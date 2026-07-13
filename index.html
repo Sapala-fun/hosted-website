@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OwnerRez Vacation Rental</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 2rem;
+        background: linear-gradient(135deg, #0f172a, #1e293b);
+        color: #f8fafc;
+      }
+
+      main {
+        max-width: 1000px;
+        margin: 0 auto;
+        display: grid;
+        gap: 1.5rem;
+      }
+
+      .card {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+      }
+
+      form {
+        display: grid;
+        gap: 0.8rem;
+      }
+
+      input, button {
+        padding: 0.8rem 1rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+        background: #38bdf8;
+        color: #082f49;
+        font-weight: 700;
+      }
+
+      .property-list {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .property-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        align-items: center;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        background: rgba(56, 189, 248, 0.2);
+        border-radius: 999px;
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="card">
+        <h1>OwnerRez Vacation Rental</h1>
+        <p>This static site is hosted on GitHub Pages and uses a backend API for live data and booking flows.</p>
+        <p id="status">Checking API connection…</p>
+      </section>
+
+      <section class="card">
+        <h2>Available properties</h2>
+        <div id="property-list" class="property-list">Loading properties…</div>
+      </section>
+
+      <section class="card">
+        <h2>Request a booking</h2>
+        <form id="booking-form">
+          <input id="guest-name" name="guestName" placeholder="Your name" required />
+          <input id="check-in" name="checkIn" type="date" required />
+          <input id="check-out" name="checkOut" type="date" required />
+          <button type="submit">Send booking request</button>
+        </form>
+        <p id="booking-message"></p>
+      </section>
+    </main>
+
+    <script>
+      const apiBase = window.API_BASE_URL || 'http://localhost:3001';
+
+      async function refreshStatus() {
+        const status = document.getElementById('status');
+        status.textContent = 'Checking API connection…';
+
+        try {
+          const response = await fetch(`${apiBase}/api/health`);
+          const data = await response.json();
+          status.textContent = `API status: ${data.status}`;
+        } catch (error) {
+          status.textContent = `API unavailable: ${error.message}`;
+        }
+      }
+
+      async function loadProperties() {
+        const container = document.getElementById('property-list');
+        container.textContent = 'Loading properties…';
+
+        try {
+          const response = await fetch(`${apiBase}/api/properties`);
+          const data = await response.json();
+          const properties = data.properties || [];
+
+          if (!properties.length) {
+            container.textContent = 'No properties available.';
+            return;
+          }
+
+          container.innerHTML = properties.map((property) => `
+            <article class="property-item">
+              <div>
+                <strong>${property.name}</strong>
+                <div>${property.description}</div>
+              </div>
+              <div class="pill">$${property.nightlyRate} / night</div>
+            </article>
+          `).join('');
+        } catch (error) {
+          container.textContent = `Unable to load properties: ${error.message}`;
+        }
+      }
+
+      document.getElementById('booking-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const form = event.currentTarget;
+        const message = document.getElementById('booking-message');
+        const payload = {
+          guestName: form.guestName.value,
+          checkIn: form.checkIn.value,
+          checkOut: form.checkOut.value,
+        };
+
+        message.textContent = 'Submitting booking request…';
+
+        try {
+          const response = await fetch(`${apiBase}/api/book`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          const data = await response.json();
+          message.textContent = data.message || 'Booking request received';
+        } catch (error) {
+          message.textContent = `Booking failed: ${error.message}`;
+        }
+      });
+
+      window.addEventListener('load', () => {
+        refreshStatus();
+        loadProperties();
+      });
+    </script>
+  </body>
+</html>

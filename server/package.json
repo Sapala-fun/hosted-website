@@ -1,0 +1,10 @@
+{
+  "name": "ownerrez-github-pages-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Small Node.js API layer for a GitHub Pages based OwnerRez site",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  }
+}
