@@ -11,16 +11,12 @@ This repository now contains a starter implementation for a vacation rental webs
 
 ## Local development
 
-1. Start the API server:
+1. Start the full stack (API + frontend) with one command:
    ```bash
    cd backend
    go run .
    ```
-2. Serve the frontend from the repository root, for example:
-   ```bash
-   python3 -m http.server 8000
-   ```
-3. Visit http://localhost:8000 to view the site.
+2. Visit http://localhost:3001 to view the site.
 
 ## OwnerRez integration
 
