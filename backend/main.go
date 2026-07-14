@@ -33,29 +33,39 @@ func main() {
 	r := gin.Default()
 	r.Use(corsMiddleware())
 
-	// API routes
-	api := r.Group("/api")
-	{
-		api.GET("/health", func(c *gin.Context) {
-			c.JSON(200, gin.H{
-				"status":    "ok",
-				"service":   "ownerrez-proxy-go",
-				"timestamp": "now",
-			})
-		})
-		api.GET("/properties", func(c *gin.Context) {
-			propertiesHandler(c, client)
-		})
-		api.POST("/book", func(c *gin.Context) {
-			bookHandler(c, client)
-		})
-	}
-
-	// Serve static files from the repository root (parent of backend/)
+	// Serve static files from the Astro build output (frontend/dist/)
 	cwd, _ := os.Getwd()
 	repoRoot := filepath.Dir(cwd)
-	r.StaticFile("/", repoRoot+"/index.html")
-	r.StaticFile("/favicon.svg", repoRoot+"/frontend/public/favicon.svg")
+	frontendDist := filepath.Join(repoRoot, "frontend", "dist")
+
+	// API routes take precedence over static files
+	r.GET("/api/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":    "ok",
+			"service":   "ownerrez-proxy-go",
+			"timestamp": "now",
+		})
+	})
+	r.GET("/api/properties", func(c *gin.Context) {
+		propertiesHandler(c, client)
+	})
+	r.POST("/api/book", func(c *gin.Context) {
+		bookHandler(c, client)
+	})
+
+	// Serve Astro build output for all other routes
+	r.StaticFS("/_astro", http.Dir(filepath.Join(frontendDist, "_astro")))
+	r.GET("/", func(c *gin.Context) {
+		c.File(filepath.Join(frontendDist, "index.html"))
+	})
+	r.NoRoute(func(c *gin.Context) {
+		path := c.Request.URL.Path
+		if c.Request.Method == http.MethodGet && len(path) > 4 && path[1:5] != "api/" {
+			c.File(filepath.Join(frontendDist, "index.html"))
+		} else {
+			c.AbortWithStatusJSON(404, gin.H{"error": "not_found"})
+		}
+	})
 
 	port := os.Getenv("PORT")
 	if port == "" {
