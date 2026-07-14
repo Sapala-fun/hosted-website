@@ -7,7 +7,7 @@ help: ## Show this help message
 
 # Start full stack (backend serves both API and frontend)
 dev: ## Run backend + frontend locally (one process)
-	@cd backend && go run .
+	@cd backend && go env -w GOPROXY=direct && go run .
 
 # Start backend and frontend as separate processes
 dev-separate: ## Run backend and frontend as two separate processes

@@ -8,6 +8,7 @@ import (
 
 	"github.com/example/ownerrez-github-pages/internal/ownerrez"
 	"github.com/gin-gonic/gin"
+	_ "github.com/joho/godotenv/autoload"
 )
 
 func corsMiddleware() gin.HandlerFunc {

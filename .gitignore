@@ -2,6 +2,10 @@
 frontend/node_modules/
 backend/run-go.sh
 
+# Env files
+frontend/.env
+backend/.env
+
 # Build outputs
 frontend/dist/
 frontend/.astro/
