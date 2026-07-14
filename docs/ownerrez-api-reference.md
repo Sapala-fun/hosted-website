@@ -20,6 +20,10 @@ All requests go to `https://api.ownerrez.com`. Paths are versioned under `/v2`.
 - **OAuth 2.0** — send `Authorization: Bearer {token}`
 - **HTTP Basic** — API key as username, blank password
 
+### Current implementation: Personal Token
+
+The backend currently uses a personal token via `Authorization: Bearer {token}` header. This will be switched to OAuth 2.0 later.
+
 ## Key Integration Points
 
 | Feature | Endpoint Pattern | Status |
@@ -34,6 +38,8 @@ All requests go to `https://api.ownerrez.com`. Paths are versioned under `/v2`.
 
 ```bash
 export OWNERREZ_API_BASE_URL="https://api.ownerrez.com"
+export OWNERREZ_PERSONAL_TOKEN="your-personal-token"
+# or API key (HTTP Basic):
 export OWNERREZ_API_KEY="your-api-key"
 # or OAuth token:
 export OWNERREZ_OAUTH_TOKEN="your-oauth-token"
@@ -43,7 +49,7 @@ export OWNERREZ_OAUTH_TOKEN="your-oauth-token"
 
 | File | Purpose |
 |------|---------|
-| `backend/main.go` | HTTP server with `/api/health`, `/api/properties`, `/api/book` endpoints |
+| `backend/main.go` | Gin HTTP server with `/api/health`, `/api/properties`, `/api/book` endpoints |
 | `backend/internal/ownerrez/client.go` | OwnerRez client layer for property and booking requests |
 
 ## Changelog
@@ -51,6 +57,7 @@ export OWNERREZ_OAUTH_TOKEN="your-oauth-token"
 | Date | Change |
 |------|--------|
 | 2026-07-13 | Initial reference captured from https://api.ownerrez.com/help/v2 |
+| 2026-07-14 | Updated for personal token auth, v2 API paths, and Go + Gin backend |
 
 ## Update Procedure
 

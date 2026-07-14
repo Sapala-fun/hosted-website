@@ -1,0 +1,54 @@
+---
+import '../styles/global.css';
+import type { Props } from './types';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Oceanfront Villas in St. Croix, USVI' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <title>{title} | Sapala Fun</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav-inner">
+        <a href="/" class="nav-logo">Sapala.Fun</a>
+        <div class="nav-links">
+          <a href="/">Home</a>
+          <a href="#properties">Properties</a>
+          <a href="#contact">Contact</a>
+          <a href="/book" class="btn-book">Book Now</a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer" id="contact">
+      <p>&copy; {new Date().getFullYear()} SAPALA.FUN &middot; <a href="mailto:info@sapala.fun">INFO@SAPALA.FUN</a></p>
+      <p style="margin-top:0.5rem;">
+        <a href="https://facebook.com/sapala" target="_blank" rel="noopener">Facebook</a> &middot;
+        <a href="https://instagram.com/sapala" target="_blank" rel="noopener">Instagram</a> &middot;
+        <a href="https://twitter.com/sapala" target="_blank" rel="noopener">Twitter</a> &middot;
+        <a href="https://youtube.com/@sapala" target="_blank" rel="noopener">YouTube</a>
+      </p>
+    </footer>
+
+    <slot name="scripts" />
+  </body>
+</html>

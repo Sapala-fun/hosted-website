@@ -1,42 +1,91 @@
-# OwnerRez GitHub Pages starter
+# Sapala Fun — Oceanfront Villas in St. Croix, USVI
 
-This repository now contains a starter implementation for a vacation rental website that can be hosted on GitHub Pages while using a small Go-based backend API to connect to OwnerRez-style data and booking flows.
+Migrated from OwnerRez hosting to:
+
+- **Frontend**: Astro static site hosted on GitHub Pages
+- **Backend**: Go + Gin API hosted on Google Cloud Run
+- **Booking**: OwnerRez hosted booking page (switchable to custom later)
+
+## Architecture
+
+```mermaid
+flowchart LR
+  A[Guest Browser] --> B[GitHub Pages<br/>Astro Frontend]
+  B --> C[Cloud Run<br/>Go + Gin Backend]
+  C --> D[OwnerRez API<br/>Personal Token → OAuth]
+  B --> E[OwnerRez Hosted<br/>Booking Page]
+```
 
 ## Structure
 
-- index.html — static landing page for GitHub Pages
-- backend/ — Go API service with health, properties, and booking endpoints
-- backend/internal/ownerrez/ — OwnerRez client layer for property and booking requests
-- .github/workflows/deploy-pages.yml — GitHub Pages deployment workflow
+| Directory | Purpose |
+|-----------|---------|
+| `frontend/` | Astro static site (GitHub Pages) |
+| `backend/` | Go + Gin API server (Cloud Run) |
+| `docs/` | Documentation including OwnerRez API reference |
+| `.github/workflows/` | CI/CD pipelines for both services |
 
 ## Local development
 
-1. Start the full stack (API + frontend) with one command:
-   ```bash
-   cd backend
-   go run .
-   ```
-2. Visit http://localhost:3001 to view the site.
+### Full stack (one command)
+```bash
+cd backend && go run .
+```
+Visit http://localhost:3001 — serves both frontend and API.
+
+### Separate processes (mirrors production)
+**Terminal 1 — Backend:**
+```bash
+cd backend && go run .
+```
+
+**Terminal 2 — Frontend:**
+```bash
+cd frontend && npm install && npm run dev
+```
+Visit http://localhost:4321 — calls API at http://localhost:3001.
 
 ## OwnerRez integration
 
-To connect the proxy to a real OwnerRez account, set these environment variables before starting the server:
-
+### Current: Personal Token
 ```bash
-export OWNERREZ_API_BASE_URL="https://your-ownerrez-instance"
-export OWNERREZ_API_KEY="your-api-key"
+export OWNERREZ_API_BASE_URL="https://api.ownerrez.com"
+export OWNERREZ_PERSONAL_TOKEN="your-personal-token"
 ```
 
-The backend will use them to proxy property and booking requests from the frontend without exposing secrets in the browser.
+### Future: OAuth 2.0 (to be implemented)
+```bash
+export OWNERREZ_OAUTH_TOKEN="your-oauth-token"
+```
 
-## Deployment plan
+The backend prioritizes credentials in this order: Personal Token → API Key → OAuth Token.
 
-- Host the static frontend on GitHub Pages.
-- Deploy the Go API to Render, Fly.io, Railway, Cloud Run, or a VPS.
-- Point the frontend to the deployed API URL by setting window.API_BASE_URL in the browser or by changing the frontend script to use the deployed origin.
+## Deployment
+
+### Frontend (GitHub Pages)
+1. Push to `main` branch
+2. GitHub Actions auto-deploys via `.github/workflows/deploy-pages.yml`
+
+### Backend (Google Cloud Run)
+1. Set secrets in GitHub repo settings:
+   - `GCLOUD_SERVICE_ACCOUNT_KEY` — GCP service account JSON
+   - `GCLOUD_REGION` — e.g., `us-central1`
+   - `GCLOUD_PROJECT` — your GCP project ID
+   - `OWNERREZ_PERSONAL_TOKEN` — your OwnerRez personal token
+2. Push to `main` branch
+3. GitHub Actions auto-deploys via `.github/workflows/deploy-backend.yml`
+
+## Design flexibility
+
+The Astro frontend uses a modular CSS approach. To try alternative designs:
+1. Copy `frontend/src/styles/global.css` to a new file (e.g., `global-modern.css`)
+2. Update the import in `frontend/src/layouts/Layout.astro`
+3. Preview locally with `npm run dev`
+4. Switch back anytime
 
 ## Notes
 
-- GitHub Pages is ideal for the public website.
-- Booking and OwnerRez API secrets should stay on the backend, not in the browser.
-- The current API layer is a starter and should be extended with your real OwnerRez credentials and endpoints once available.
+- GitHub Pages is free for the static frontend
+- Cloud Run has a generous free tier
+- OwnerRez API secrets stay on the backend, never in the browser
+- Booking currently uses OwnerRez's hosted booking page

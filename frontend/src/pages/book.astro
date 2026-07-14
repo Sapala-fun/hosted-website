@@ -1,0 +1,32 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { apiBaseUrl } from '../config/site';
+
+const ownerRezBookingUrl = 'https://www.ownerrez.com/book/your-booking-url-here';
+---
+
+<Layout title="Book Your Stay" description="Reserve your oceanfront villa in St. Croix">
+  <section class="section" style="max-width:600px; margin-top:2rem;">
+    <h1 class="section-title" style="text-align:center;">Book Your Stay</h1>
+    <p class="section-subtitle" style="text-align:center;">Complete your reservation through OwnerRez's secure booking system.</p>
+
+    <div style="background:var(--color-card-bg); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:2rem; text-align:center;">
+      <p style="margin-bottom:1.5rem; color:#cbd5e1;">
+        You will be redirected to OwnerRez's secure booking platform to complete your reservation.
+      </p>
+      <a href={ownerRezBookingUrl} target="_blank" rel="noopener" class="btn-book" style="display:inline-block; font-size:1.1rem; padding:0.9rem 2rem;">
+        Proceed to Booking
+      </a>
+      <p style="margin-top:1.5rem; font-size:0.85rem; color:var(--color-muted);">
+        Secure payment &middot; Instant confirmation &middot; Free cancellation (60+ days)
+      </p>
+    </div>
+
+    <div style="margin-top:2rem; text-align:center;">
+      <h3 style="margin-bottom:0.5rem;">Need help?</h3>
+      <p style="color:var(--color-muted);">
+        Contact us at <a href="mailto:info@sapala.fun">info@sapala.fun</a> or call us directly.
+      </p>
+    </div>
+  </section>
+</Layout>

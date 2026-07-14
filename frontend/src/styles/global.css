@@ -1,0 +1,111 @@
+/* === Reset & Base === */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --color-primary: #0c4a6e;
+  --color-accent: #38bdf8;
+  --color-dark: #0f172a;
+  --color-light: #f8fafc;
+  --color-muted: #94a3b8;
+  --color-card-bg: rgba(255, 255, 255, 0.06);
+  --font-main: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --max-width: 1100px;
+}
+
+html { font-family: var(--font-main); color: var(--color-light); background: var(--color-dark); scroll-behavior: smooth; }
+body { line-height: 1.6; }
+a { color: var(--color-accent); text-decoration: none; transition: color 0.2s; }
+a:hover { color: #7dd3fc; }
+img { max-width: 100%; display: block; }
+
+/* === Header / Nav === */
+.site-header {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.nav-inner {
+  max-width: var(--max-width); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+}
+.nav-logo { font-size: 1.35rem; font-weight: 800; color: var(--color-light); letter-spacing: -0.02em; }
+.nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.nav-links a { color: var(--color-muted); font-size: 0.95rem; font-weight: 500; }
+.nav-links a:hover { color: var(--color-light); }
+.btn-book {
+  background: var(--color-accent); color: var(--color-dark);
+  padding: 0.55rem 1.3rem; border-radius: 999px; font-weight: 700;
+  font-size: 0.9rem; transition: background 0.2s, transform 0.15s;
+}
+.btn-book:hover { background: #7dd3fc; transform: translateY(-1px); color: var(--color-dark); }
+
+/* === Hero Carousel === */
+.hero { position: relative; height: 65vh; min-height: 420px; overflow: hidden; }
+.hero-slide {
+  position: absolute; inset: 0; opacity: 0; transition: opacity 1s ease;
+  background-size: cover; background-position: center;
+}
+.hero-slide.active { opacity: 1; }
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(15,23,42,0.35), rgba(15,23,42,0.7));
+}
+.hero-content {
+  position: absolute; bottom: 12%; left: 50%; transform: translateX(-50%);
+  text-align: center; width: 90%; max-width: 680px;
+}
+.hero-content h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; margin-bottom: 0.5rem; }
+.hero-content p { font-size: 1.1rem; color: #cbd5e1; margin-bottom: 1.2rem; }
+
+/* === Section === */
+.section { max-width: var(--max-width); margin: 0 auto; padding: 3.5rem 1.5rem; }
+.section-title { font-size: 1.6rem; font-weight: 700; margin-bottom: 0.4rem; }
+.section-subtitle { color: var(--color-muted); margin-bottom: 2rem; }
+
+/* === Property Cards === */
+.property-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+.property-card {
+  background: var(--color-card-bg); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+}
+.property-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+.property-card-img { height: 220px; background-size: cover; background-position: center; }
+.property-card-body { padding: 1.2rem 1.4rem; }
+.property-card-body h3 { font-size: 1.15rem; margin-bottom: 0.3rem; }
+.property-card-body .meta { color: var(--color-muted); font-size: 0.9rem; margin-bottom: 0.6rem; }
+.property-card-body .price { font-size: 1.25rem; font-weight: 700; color: var(--color-accent); }
+
+/* === Property Detail Page === */
+.detail-hero { height: 55vh; background-size: cover; background-position: center; position: relative; }
+.detail-hero .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(15,23,42,0.2), rgba(15,23,42,0.8)); }
+.detail-hero .hero-content { position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%); text-align: center; width: 90%; max-width: 700px; }
+.detail-body { max-width: var(--max-width); margin: -4rem auto 0; padding: 0 1.5rem 3rem; position: relative; z-index: 2; display: grid; grid-template-columns: 1fr 340px; gap: 2rem; }
+.detail-main { background: var(--color-card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 2rem; }
+.detail-sidebar { position: sticky; top: 80px; align-self: start; }
+.sidebar-card { background: var(--color-card-bg); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 1.5rem; margin-bottom: 1rem; }
+.sidebar-price { font-size: 1.8rem; font-weight: 800; color: var(--color-accent); }
+.sidebar-btn { display: block; width: 100%; text-align: center; padding: 0.85rem; background: var(--color-accent); color: var(--color-dark); border-radius: 999px; font-weight: 700; margin-top: 1rem; transition: background 0.2s; }
+.sidebar-btn:hover { background: #7dd3fc; color: var(--color-dark); }
+
+/* === Photo Gallery === */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 1.5rem; }
+.gallery-grid img { border-radius: 8px; aspect-ratio: 4/3; object-fit: cover; cursor: pointer; transition: opacity 0.2s; }
+.gallery-grid img:hover { opacity: 0.85; }
+
+/* === Amenities Table === */
+.amenities-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+.amenities-table th, .amenities-table td { text-align: left; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 0.95rem; }
+.amenities-table th { color: var(--color-accent); font-weight: 600; width: 180px; }
+
+/* === Footer === */
+.site-footer { border-top: 1px solid rgba(255,255,255,0.08); padding: 2rem 1.5rem; text-align: center; color: var(--color-muted); font-size: 0.9rem; }
+.site-footer a { margin: 0 0.4rem; }
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .detail-body { grid-template-columns: 1fr; }
+  .detail-sidebar { position: static; }
+  .nav-links { gap: 0.8rem; }
+}

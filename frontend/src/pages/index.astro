@@ -1,0 +1,94 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { apiBaseUrl } from '../config/site';
+import type { Property } from '../types';
+
+const properties: Property[] = [
+  {
+    id: 'orp5b5eae5x',
+    slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
+    name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
+    description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
+    bedrooms: 5,
+    bathrooms: 5,
+    sleeps: '11-13',
+    nightlyRateMin: 329,
+    nightlyRateMax: 998,
+    imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+  },
+  {
+    id: 'orp5b5e872x',
+    slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
+    name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
+    description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
+    bedrooms: 4,
+    bathrooms: 4,
+    sleeps: '8-10',
+    nightlyRateMin: 269,
+    nightlyRateMax: 398,
+    imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+  },
+  {
+    id: 'orp5b5e89fx',
+    slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
+    name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
+    description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
+    bedrooms: 1,
+    bathrooms: 1,
+    sleeps: '2',
+    nightlyRateMin: 119,
+    nightlyRateMax: 198,
+    imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+  },
+];
+
+const heroSlides = [
+  'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+  'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+  'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
+];
+---
+
+<Layout title="Home" description="Oceanfront Villas in St. Croix, USVI">
+  <!-- Hero Carousel -->
+  <section class="hero">
+    {heroSlides.map((url, i) => (
+      <div class={`hero-slide${i === 0 ? ' active' : ''}`} style={`background-image: url('${url}');`}></div>
+    ))}
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Oceanfront Villas in St. Croix</h1>
+      <p>Experience the Caribbean in luxury. Three unique properties on a stunning 0.8-acre oceanfront estate.</p>
+      <a href="#properties" class="btn-book">View Properties</a>
+    </div>
+  </section>
+
+  <!-- Property Listings -->
+  <section class="section" id="properties">
+    <h2 class="section-title">3 Listings</h2>
+    <p class="section-subtitle">Choose from our exclusive oceanfront properties</p>
+    <div class="property-grid">
+      {properties.map((prop) => (
+        <a href={`/${prop.slug}`} class="property-card">
+          <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}></div>
+          <div class="property-card-body">
+            <h3>{prop.name}</h3>
+            <p class="meta">{prop.bedrooms} Bedrooms &middot; {prop.bathrooms} Bathrooms &middot; Sleeps {prop.sleeps}</p>
+            <p class="price">${prop.nightlyRateMin}&ndash;${prop.nightlyRateMax}/night</p>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Scripts for carousel -->
+  <script>
+    const slides = document.querySelectorAll('.hero-slide');
+    let current = 0;
+    setInterval(() => {
+      slides[current]?.classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current]?.classList.add('active');
+    }, 5000);
+  </script>
+</Layout>
