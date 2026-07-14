@@ -1,7 +1,6 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { apiBaseUrl } from '../../config/site';
-import type { Property } from '../../types';
+import Layout from '../components/Layout.astro';
+import type { Property } from '../types';
 
 export function getStaticPaths() {
   const properties: Property[] = [

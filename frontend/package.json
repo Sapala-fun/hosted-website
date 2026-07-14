@@ -9,7 +9,6 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.16.0",
-    "@astrojs/github-pages": "^3.0.0"
+    "astro": "^4.16.0"
   }
 }

@@ -1,2 +1,7 @@
-server/node_modules/
+# Dependencies
+frontend/node_modules/
 backend/run-go.sh
+
+# Build outputs
+frontend/dist/
+frontend/.astro/
