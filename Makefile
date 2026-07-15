@@ -22,6 +22,9 @@ build-backend: ## Build the Go backend binary
 	@cd backend && go build -o ../bin/ownerrez-proxy .
 
 build-frontend: ## Build the Astro static site
+	@if [ ! -f frontend/src/styles/theme.css ]; then \
+		bash scripts/switch-theme.sh modern; \
+	fi
 	@cd frontend && npm run build
 
 test-backend: ## Run backend unit tests

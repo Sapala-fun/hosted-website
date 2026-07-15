@@ -49,6 +49,9 @@ func main() {
 	r.GET("/api/properties", func(c *gin.Context) {
 		propertiesHandler(c, client)
 	})
+	r.GET("/api/property/:slug", func(c *gin.Context) {
+		propertyBySlugHandler(c, client)
+	})
 	r.POST("/api/book", func(c *gin.Context) {
 		bookHandler(c, client)
 	})
@@ -99,6 +102,30 @@ func propertiesHandler(c *gin.Context, client *ownerrez.Client) {
 	}
 
 	c.JSON(200, gin.H{"properties": properties})
+}
+
+func propertyBySlugHandler(c *gin.Context, client *ownerrez.Client) {
+	c.Header("Content-Type", "application/json")
+	slug := c.Param("slug")
+
+	property, err := client.GetProperty(slug)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"property": gin.H{
+				"id":          slug,
+				"name":        slug,
+				"slug":        slug,
+				"description": "Property data unavailable.",
+				"nightlyRate": 0,
+				"bedrooms":    0,
+				"bathrooms":   0,
+			},
+			"warning": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{"property": property})
 }
 
 func bookHandler(c *gin.Context, client *ownerrez.Client) {

@@ -69,15 +69,44 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 	return payload.Data, nil
 }
 
-func (c *Client) CreateBooking(payload map[string]string) (map[string]any, error) {
+func (c *Client) GetProperty(slug string) (map[string]any, error) {
 	if c.BaseURL == "" || c.authHeader() == "" {
 		return nil, fmt.Errorf("ownerrez credentials not configured")
 	}
 
-	body, err := json.Marshal(payload)
+	req, err := http.NewRequest(http.MethodGet, c.BaseURL+"/v2/properties", nil)
 	if err != nil {
 		return nil, err
 	}
+	req.Header.Set("Authorization", c.authHeader())
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 400 {
+		return nil, fmt.Errorf("ownerrez properties request failed: %s", resp.Status)
+	}
+
+	var payload struct {
+		Data []map[string]any `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+		return nil, err
+	}
+
+	for _, prop := range payload.Data {
+		if s, ok := prop["slug"].(string); ok && s == slug {
+			return prop, nil
+		}
+	}
+	return nil, fmt.Errorf("property not found: %s", slug)
+}
+
+func (c *Client) CreateBooking(payload map[string]string) (map[string]any, error) {
 
 	req, err := http.NewRequest(http.MethodPost, c.BaseURL+"/v2/bookings", bytes.NewReader(body))
 	if err != nil {
