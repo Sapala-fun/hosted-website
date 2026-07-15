@@ -107,6 +107,14 @@ func (c *Client) GetProperty(slug string) (map[string]any, error) {
 }
 
 func (c *Client) CreateBooking(payload map[string]string) (map[string]any, error) {
+	if c.BaseURL == "" || c.authHeader() == "" {
+		return nil, fmt.Errorf("ownerrez credentials not configured")
+	}
+
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest(http.MethodPost, c.BaseURL+"/v2/bookings", bytes.NewReader(body))
 	if err != nil {
