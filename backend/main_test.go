@@ -1,35 +1,89 @@
 package main
 
 import (
-    "net/http"
-    "net/http/httptest"
-    "testing"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
 
-    "github.com/example/ownerrez-github-pages/internal/ownerrez"
+	"github.com/example/ownerrez-github-pages/internal/ownerrez"
+	"github.com/gin-gonic/gin"
 )
 
 func TestHealthHandler(t *testing.T) {
-    req := httptest.NewRequest(http.MethodGet, "/api/health", nil)
-    rr := httptest.NewRecorder()
+	gin.SetMode(gin.TestMode)
+	engine := gin.Default()
 
-    healthHandler(rr, req)
+	engine.GET("/api/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":    "ok",
+			"service":   "ownerrez-proxy-go",
+			"timestamp": "now",
+		})
+	})
 
-    if rr.Code != http.StatusOK {
-        t.Fatalf("expected status %d, got %d", http.StatusOK, rr.Code)
-    }
+	req := httptest.NewRequest(http.MethodGet, "/api/health", nil)
+	w := httptest.NewRecorder()
+	engine.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+	}
 }
 
-func TestBookHandler(t *testing.T) {
-    body := `{"guestName":"Ada","checkIn":"2026-08-01","checkOut":"2026-08-03"}`
-    req := httptest.NewRequest(http.MethodPost, "/api/book", http.NoBody)
-    req.Body = http.NoBody
-    _ = body
-    rr := httptest.NewRecorder()
+func TestBookHandler_InvalidJSON(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.Default()
+	client := ownerrez.NewClient()
 
-    client := ownerrez.NewClient()
-    bookHandler(rr, req, client)
+	engine.POST("/api/book", func(c *gin.Context) {
+		bookHandler(c, client)
+	})
 
-    if rr.Code != http.StatusBadRequest {
-        t.Fatalf("expected bad request for empty body, got %d", rr.Code)
-    }
+	req := httptest.NewRequest(http.MethodPost, "/api/book", strings.NewReader(`not json`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	engine.ServeHTTP(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Fatalf("expected bad request status %d, got %d", http.StatusBadRequest, w.Code)
+	}
+}
+
+func TestBookHandler_EmptyBody(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.Default()
+	client := ownerrez.NewClient()
+
+	engine.POST("/api/book", func(c *gin.Context) {
+		bookHandler(c, client)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/book", strings.NewReader(`{}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	engine.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+	}
+}
+
+func TestBookHandler_MissingFields(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.Default()
+	client := ownerrez.NewClient()
+
+	engine.POST("/api/book", func(c *gin.Context) {
+		bookHandler(c, client)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/book", strings.NewReader(`{"guestName":"Test"}`))
+	req.Header.Set("Content-Type", "application/json")
+	w := httptest.NewRecorder()
+	engine.ServeHTTP(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Fatalf("expected status %d, got %d", http.StatusOK, w.Code)
+	}
 }

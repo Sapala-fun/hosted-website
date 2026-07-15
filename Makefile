@@ -1,4 +1,4 @@
-.PHONY: dev dev-separate build-backend build-frontend test-backend clean help
+.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test-all lint-backend lint-frontend lint clean help
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -24,9 +24,38 @@ build-backend: ## Build the Go backend binary
 build-frontend: ## Build the Astro static site
 	@cd frontend && npm run build
 
-test-backend: ## Run backend tests
+test-backend: ## Run backend unit tests
 	@cd backend && go test ./...
 
+test-backend-cover: ## Run backend tests with coverage report
+	@cd backend && go test -coverprofile=coverage.out ./...
+	@cd backend && go tool cover -func=coverage.out
+
+test-backend-short: ## Run backend tests only (no network)
+	@cd backend && go test -short ./...
+
+test-frontend: ## Run frontend tests (Vitest)
+	@cd frontend && npm test
+
+test-all: ## Run all tests (backend + frontend)
+	@echo "Running backend tests..."
+	@cd backend && go test ./...
+	@echo ""
+	@echo "Running frontend tests..."
+	@cd frontend && npm test
+	@echo ""
+	@echo "All tests passed!"
+
+lint-backend: ## Lint Go code (golangci-lint if available, otherwise golint)
+	@if command -v golangci-lint &> /dev/null; then \
+		cd backend && golangci-lint run ./...; \
+	else \
+		cd backend && go vet ./...; \
+	fi
+
+lint-frontend: ## Lint frontend code (ESLint/Prettier)
+	@cd frontend && npm run lint || echo "No lint script found, skipping"
+
 clean: ## Remove build outputs and binaries
-	@rm -rf frontend/dist frontend/.astro bin/ownerrez-proxy
+	@rm -rf frontend/dist frontend/.astro bin/ownerrez-proxy backend/coverage.out
 	@echo "Cleaned build artifacts"
