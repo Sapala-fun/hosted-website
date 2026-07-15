@@ -7,7 +7,7 @@ export function getStaticPaths() {
     {
       id: 'orp5b5eae5x',
       slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
-      name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
+      name: 'Sapala All',
       description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory\'s Jacks & Issac\'s Bay.',
       bedrooms: 5,
       bathrooms: 5,
@@ -19,7 +19,7 @@ export function getStaticPaths() {
     {
       id: 'orp5b5e872x',
       slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
-      name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
+      name: 'Sapala 1',
       description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory\'s Jacks & Issac\'s Bay.',
       bedrooms: 4,
       bathrooms: 4,
@@ -31,7 +31,7 @@ export function getStaticPaths() {
     {
       id: 'orp5b5e89fx',
       slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
-      name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
+      name: 'Sapala 2',
       description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean. Walking distance to a nearby beach and the Nature Conservatory\'s Jacks & Issac\'s Bay.',
       bedrooms: 1,
       bathrooms: 1,
@@ -88,17 +88,15 @@ const cancellationPolicy = 'One hundred percent (100.00%) of the total booking c
   <div class="detail-body">
     <div class="detail-main">
       <h2>About</h2>
-      <p style="margin-top:1rem; color:#cbd5e1;">
-        {property.description}
-      </p>
+      <p>{property.description}</p>
 
-      <h2 style="margin-top:2.5rem;">Rates &amp; Availability</h2>
-      <div style="margin-top:1rem; padding:1rem; background:rgba(56,189,248,0.08); border-radius:10px;">
-        <p><strong>Cancellation Policy:</strong></p>
-        <p style="color:#cbd5e1; margin-top:0.3rem;">{cancellationPolicy}</p>
+      <h2 style="margin-top:3rem;">Rates &amp; Cancellation</h2>
+      <div class="rate-card">
+        <h3>Cancellation Policy</h3>
+        <p>{cancellationPolicy}</p>
       </div>
 
-      <h2 style="margin-top:2.5rem;">Amenities</h2>
+      <h2 style="margin-top:3rem;">Amenities</h2>
       <table class="amenities-table" style="margin-top:1rem;">
         {amenities.map((a) => (
           <tr>
@@ -108,29 +106,27 @@ const cancellationPolicy = 'One hundred percent (100.00%) of the total booking c
         ))}
       </table>
 
-      <h2 style="margin-top:2.5rem;">Photos</h2>
+      <h2 style="margin-top:3rem;">Photos</h2>
       <div class="gallery-grid" style="margin-top:1rem;">
         {galleryImages.map((img) => (
           <img src={img} alt="Property photo" loading="lazy" />
         ))}
       </div>
 
-      <h2 style="margin-top:2.5rem;">Location</h2>
-      <p style="color:#cbd5e1; margin-top:0.5rem;">Christiansted, St. Croix, USVI, Virgin Islands (U.S.)</p>
+      <h2 style="margin-top:3rem;">Location</h2>
+      <p style="color:var(--color-text-muted); margin-top:0.5rem;">Christiansted, St. Croix, USVI, Virgin Islands (U.S.)</p>
     </div>
 
     <!-- Sidebar -->
     <aside class="detail-sidebar">
       <div class="sidebar-card">
-        <p style="color:var(--color-muted); font-size:0.9rem;">Starting from</p>
-        <p class="sidebar-price">${property.nightlyRateMin}/night</p>
+        <p class="sidebar-price-label">Starting from</p>
+        <p class="sidebar-price">${property.nightlyRateMin}<span style="font-size:1rem; color:var(--color-text-muted); font-weight:400;">/night</span></p>
         <a href="/book" class="sidebar-btn">Book Now</a>
       </div>
-      <div class="sidebar-card">
-        <h3 style="margin-bottom:0.5rem;">Contact</h3>
-        <p style="color:var(--color-muted); font-size:0.9rem; margin-bottom:0.5rem;">
-          <a href="mailto:info@sapala.fun">info@sapala.fun</a>
-        </p>
+      <div class="sidebar-card sidebar-contact">
+        <h3>Contact Us</h3>
+        <p><a href="mailto:info@sapala.fun">info@sapala.fun</a></p>
       </div>
     </aside>
   </div>

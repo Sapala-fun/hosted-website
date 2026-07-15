@@ -1,4 +1,4 @@
-.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test-all lint-backend lint-frontend lint clean help
+.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test-all lint-backend lint-frontend lint clean clean-all help
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -57,5 +57,11 @@ lint-frontend: ## Lint frontend code (ESLint/Prettier)
 	@cd frontend && npm run lint || echo "No lint script found, skipping"
 
 clean: ## Remove build outputs and binaries
-	@rm -rf frontend/dist frontend/.astro bin/ownerrez-proxy backend/coverage.out
+	@rm -rf frontend/dist frontend/.astro frontend/src/styles/theme.css bin/ backend/coverage.out
+	@echo "Cleaned build artifacts"
+
+clean-all: ## Remove all generated files including dependencies
+	@$(MAKE) clean
+	@rm -rf frontend/node_modules backend/node_modules
+	@echo "Cleaned all artifacts and dependencies"
 	@echo "Cleaned build artifacts"

@@ -6,7 +6,7 @@ const properties: Property[] = [
   {
     id: 'orp5b5eae5x',
     slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
-    name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
+    name: 'Sapala All',
     description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
     bedrooms: 5,
     bathrooms: 5,
@@ -18,7 +18,7 @@ const properties: Property[] = [
   {
     id: 'orp5b5e872x',
     slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
-    name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
+    name: 'Sapala 1',
     description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
     bedrooms: 4,
     bathrooms: 4,
@@ -30,7 +30,7 @@ const properties: Property[] = [
   {
     id: 'orp5b5e89fx',
     slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
-    name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
+    name: 'Sapala 2',
     description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
     bedrooms: 1,
     bathrooms: 1,
@@ -46,6 +46,13 @@ const heroSlides = [
   'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
   'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
 ];
+
+const features = [
+  { icon: '🏖️', title: 'Private Beach', desc: '0.8 acres of pristine oceanfront' },
+  { icon: '🏊', title: 'Shared & Private Pools', desc: 'Choose your perfect setting' },
+  { icon: '🌅', title: 'Stunning Views', desc: 'Panoramic Caribbean sunsets' },
+  { icon: '✨', title: 'Luxury Amenities', desc: 'Fully equipped modern kitchens' },
+];
 ---
 
 <Layout title="Home" description="Oceanfront Villas in St. Croix, USVI">
@@ -60,20 +67,51 @@ const heroSlides = [
       <p>Experience the Caribbean in luxury. Three unique properties on a stunning 0.8-acre oceanfront estate.</p>
       <a href="#properties" class="btn-book">View Properties</a>
     </div>
+    <div class="hero-scroll-indicator">↓</div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="section-header">
+      <span class="section-label">Why Sapala</span>
+      <h2 class="section-title">A Caribbean Retreat Like No Other</h2>
+      <p class="section-subtitle">Three distinct properties, one extraordinary oceanfront estate</p>
+    </div>
+    <div class="features-grid">
+      {features.map((feature) => (
+        <div class="feature-item">
+          <div class="feature-icon">{feature.icon}</div>
+          <h3>{feature.title}</h3>
+          <p>{feature.desc}</p>
+        </div>
+      ))}
+    </div>
   </section>
 
   <!-- Property Listings -->
   <section class="section" id="properties">
-    <h2 class="section-title">3 Listings</h2>
-    <p class="section-subtitle">Choose from our exclusive oceanfront properties</p>
+    <div class="section-header">
+      <span class="section-label">Our Properties</span>
+      <h2 class="section-title">3 Exclusive Listings</h2>
+      <p class="section-subtitle">Choose from our oceanfront villas and apartments</p>
+    </div>
     <div class="property-grid">
       {properties.map((prop) => (
         <a href={`/${prop.slug}`} class="property-card">
-          <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}></div>
+          <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
+            <span class="property-card-badge">{prop.bedrooms} BR</span>
+          </div>
           <div class="property-card-body">
             <h3>{prop.name}</h3>
-            <p class="meta">{prop.bedrooms} Bedrooms &middot; {prop.bathrooms} Bathrooms &middot; Sleeps {prop.sleeps}</p>
-            <p class="price">${prop.nightlyRateMin}&ndash;${prop.nightlyRateMax}/night</p>
+            <div class="property-card-meta">
+              <span>{prop.bedrooms} Bedrooms</span>
+              <span>{prop.bathrooms} Baths</span>
+              <span>Sleeps {prop.sleeps}</span>
+            </div>
+            <div class="property-card-price">
+              <span class="amount">${prop.nightlyRateMin}</span>
+              <span class="period">/night</span>
+            </div>
           </div>
         </a>
       ))}
