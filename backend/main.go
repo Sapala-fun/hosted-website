@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -54,6 +55,9 @@ func main() {
 	})
 	r.POST("/api/book", func(c *gin.Context) {
 		bookHandler(c, client)
+	})
+	r.GET("/api/availability/:slug", func(c *gin.Context) {
+		availabilityHandler(c, client)
 	})
 
 	// Serve Astro build output for all other routes
@@ -148,4 +152,86 @@ func bookHandler(c *gin.Context, client *ownerrez.Client) {
 	}
 
 	c.JSON(200, result)
+}
+
+func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
+	c.Header("Content-Type", "application/json")
+	slug := c.Param("slug")
+
+	yearStr := c.Query("year")
+	monthStr := c.Query("month")
+
+	if yearStr == "" || monthStr == "" {
+		c.JSON(400, gin.H{"error": "year and month query parameters are required"})
+		return
+	}
+
+	var year, month int
+	if _, err := fmt.Sscanf(yearStr, "%d", &year); err != nil {
+		c.JSON(400, gin.H{"error": "invalid year parameter"})
+		return
+	}
+	if _, err := fmt.Sscanf(monthStr, "%d", &month); err != nil {
+		c.JSON(400, gin.H{"error": "invalid month parameter"})
+		return
+	}
+
+	// First, find the property ID from slug
+	properties, err := client.GetProperties()
+	if err != nil {
+		c.JSON(200, gin.H{
+			"dates":  []ownerrez.AvailabilityDate{},
+			"slug":   slug,
+			"year":   year,
+			"month":  month,
+			"warning": err.Error(),
+		})
+		return
+	}
+
+	var propertyID int
+	var nightlyRate float64
+	for _, prop := range properties {
+		if s, ok := prop["slug"].(string); ok && s == slug {
+			if id, ok := prop["id"].(float64); ok {
+				propertyID = int(id)
+			}
+			if nr, ok := prop["nightlyRate"].(float64); ok {
+				nightlyRate = nr
+			}
+			break
+		}
+	}
+
+	if propertyID == 0 {
+		c.JSON(404, gin.H{"error": "property not found", "slug": slug})
+		return
+	}
+
+	dates, err := client.GetAvailability(propertyID, year, month)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"dates":   []ownerrez.AvailabilityDate{},
+			"slug":    slug,
+			"year":    year,
+			"month":   month,
+			"warning": err.Error(),
+		})
+		return
+	}
+
+	// Attach nightly rate to available dates
+	for i := range dates {
+		if !dates[i].Blocked {
+			dates[i].NightlyRate = nightlyRate
+		}
+	}
+
+	c.JSON(200, gin.H{
+		"dates":  dates,
+		"slug":   slug,
+		"year":   year,
+		"month":  month,
+		"propertyID": propertyID,
+	})
 }

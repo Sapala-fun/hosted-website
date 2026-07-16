@@ -28,11 +28,46 @@ The backend currently uses a personal token via `Authorization: Bearer {token}` 
 
 | Feature | Endpoint Pattern | Status |
 |---------|-----------------|--------|
-| Property listing data | `/v2/properties` | Pending integration |
-| Availability/calendar | `/v2/availability` | Pending integration |
-| Booking/reservation | `/v2/bookings` | Pending integration |
+| Property listing data | `/v2/properties` | Implemented |
+| Availability/calendar | `/v2/bookings` (derived) | Implemented |
+| Booking/reservation | `/v2/bookings` | Implemented |
 | Guest management | `/v2/guests` | Pending integration |
 | Messaging | `/v2/messages` | Pending integration |
+
+## Backend API Endpoints
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/api/health` | GET | Health check |
+| `/api/properties` | GET | List all properties |
+| `/api/property/:slug` | GET | Get property by slug |
+| `/api/availability/:slug` | GET | Get availability calendar for a property (query params: `year`, `month`) |
+| `/api/book` | POST | Create a booking request |
+
+### Availability Response Schema
+
+```json
+{
+  "dates": [
+    {
+      "date": "2026-07-16",
+      "blocked": false,
+      "nightlyRate": 210.00
+    },
+    {
+      "date": "2026-07-17",
+      "blocked": true,
+      "reason": "Reserved"
+    }
+  ],
+  "slug": "ocean-view-retreat",
+  "year": 2026,
+  "month": 7,
+  "propertyID": 12345
+}
+```
+
+Availability is derived from the OwnerRez `/v2/bookings` endpoint by filtering active/pending bookings and blocks for the given property within the requested month.
 
 ## Environment Variables
 
@@ -58,6 +93,7 @@ export OWNERREZ_OAUTH_TOKEN="your-oauth-token"
 |------|--------|
 | 2026-07-13 | Initial reference captured from https://api.ownerrez.com/help/v2 |
 | 2026-07-14 | Updated for personal token auth, v2 API paths, and Go + Gin backend |
+| 2026-07-16 | Added availability calendar endpoint (`/api/availability/:slug`) with frontend UI component |
 
 ## Update Procedure
 
