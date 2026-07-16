@@ -74,6 +74,7 @@ img { max-width: 100%; display: block; }
 .property-card-img { height: 220px; background-size: cover; background-position: center; }
 .property-card-body { padding: 1.2rem 1.4rem; }
 .property-card-body h3 { font-size: 1.15rem; margin-bottom: 0.3rem; }
+.property-card-desc { color: #cbd5e1; font-size: 0.9rem; line-height: 1.4; margin-bottom: 0.7rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.5em; }
 .property-card-body .meta { color: var(--color-muted); font-size: 0.9rem; margin-bottom: 0.6rem; }
 .property-card-body .price { font-size: 1.25rem; font-weight: 700; color: var(--color-accent); }
 

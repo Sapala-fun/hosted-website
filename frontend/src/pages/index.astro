@@ -124,20 +124,24 @@ const features = [
           <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
             <span class="property-card-badge">{prop.bedrooms} BR</span>
           </div>
-          <div class="property-card-body">
-            <h3>{prop.name}</h3>
-            <div class="property-card-meta">
-              <span>{prop.bedrooms} Bedrooms</span>
-              <span>{prop.bathrooms} Baths</span>
-              <span>Sleeps {prop.sleeps}</span>
+            <div class="property-card-body">
+              <h3>{prop.name}</h3>
+              {prop.description && (
+                <p class="property-card-desc">{prop.description}</p>
+              )}
+              <div class="property-card-meta">
+                <span>{prop.bedrooms} Bedrooms</span>
+                <span>{prop.bathrooms} Baths</span>
+                <span>Sleeps {prop.sleeps}</span>
+              </div>
+              <div class="property-card-price">
+                <span class="amount">${prop.nightlyRateMin}</span>
+                <span class="period">/night</span>
+              </div>
             </div>
-            <div class="property-card-price">
-              <span class="amount">${prop.nightlyRateMin}</span>
-              <span class="period">/night</span>
-            </div>
-          </div>
-        </a>
-      ))}
+          </a>
+        ))}
+      </div>
     </div>
   </section>
 
