@@ -23,7 +23,7 @@ build-backend: ## Build the Go backend binary
 
 build-frontend: ## Build the Astro static site
 	@if [ ! -f frontend/src/styles/theme.css ]; then \
-		bash scripts/switch-theme.sh modern; \
+		bash scripts/switch-theme.sh classic; \
 	fi
 	@cd frontend && npm run build
 

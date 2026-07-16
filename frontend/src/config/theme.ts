@@ -7,7 +7,7 @@
  * - modern: Light luxury gold template (Sapala Fun Resort)
  */
 
-export const THEME = 'modern// ← Change this to switch themes
+export const THEME = 'classic' // ← Change this to switch themes
 
 // Available themes:
 // - 'classic' → src/styles/classic.css
