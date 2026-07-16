@@ -1,104 +1,286 @@
 ---
 import Layout from '../components/Layout.astro';
-import type { Property } from '../types';
 
-export function getStaticPaths() {
-  const properties: Property[] = [
+export async function getStaticPaths() {
+  const fallbackProperties = [
     {
       id: 'orp5b5eae5x',
       slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
-      name: 'Sapala All',
-      description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory\'s Jacks & Issac\'s Bay.',
-      bedrooms: 5,
-      bathrooms: 5,
-      sleeps: '11-13',
-      nightlyRateMin: 329,
-      nightlyRateMax: 998,
-      imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
     },
     {
       id: 'orp5b5e872x',
       slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
-      name: 'Sapala 1',
-      description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory\'s Jacks & Issac\'s Bay.',
-      bedrooms: 4,
-      bathrooms: 4,
-      sleeps: '8-10',
-      nightlyRateMin: 269,
-      nightlyRateMax: 398,
-      imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+      name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
     },
     {
       id: 'orp5b5e89fx',
       slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
-      name: 'Sapala 2',
-      description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean. Walking distance to a nearby beach and the Nature Conservatory\'s Jacks & Issac\'s Bay.',
-      bedrooms: 1,
-      bathrooms: 1,
-      sleeps: '2',
-      nightlyRateMin: 119,
-      nightlyRateMax: 198,
-      imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+      name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
     },
   ];
 
-  return properties.map((prop) => ({
+  return fallbackProperties.map((prop) => ({
     params: { slug: prop.slug },
-    props: { property: prop },
+    props: { fallbackProperty: prop },
   }));
 }
 
-const { property } = Astro.props;
+const { fallbackProperty } = Astro.props;
 
-const galleryImages = [
-  'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
-  'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
-  'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
-  'https://uc.orez.io/i/e54326e81085452d8cf7d08549812254-Large',
-  'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
-  'https://uc.orez.io/i/4e4eef5ea214b219377738f20deef16-Large',
-];
+// Fallback data for build time
+const fallbackDetails = {
+  'sapala-all-exclusive-oceanfront-villa-with-private-pool': {
+    id: 'orp5b5eae5x',
+    slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
+    name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
+    description: `Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory's Jacks & Issac's Bay. A wall of windows for water views, year-round trade breezes and the soothing sound of waves from the shoreline below make for an unforgettable stay. Olympic style 50' seaside pool is delightful after a kayak or snorkeling excursion down in front.
 
-const amenities = [
-  { category: 'Listing Type', value: 'Villa' },
-  { category: 'Accommodation', value: 'Entire Home' },
-  { category: 'Check-In', value: 'Lockbox' },
-  { category: 'Setting & View', value: 'Oceanfront, Ocean View' },
-  { category: 'Internet / Wifi', value: 'Yes' },
-  { category: 'Air Conditioning', value: 'Yes' },
-  { category: 'Kitchen', value: 'Full Kitchen' },
-  { category: 'Pool/Spa', value: 'Private Pool' },
-  { category: 'Vehicles', value: 'Free Parking' },
-];
+Entire Villa consisting of both the units: Sapala 1 (4 bedrooms) and Sapala 2 (1 bedroom) will be exclusively available to you and it will not be shared with anyone else.
 
-const cancellationPolicy = 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to the arrival date. Fifty percent (50.00%) will be refunded if more than 30 days prior. For cancellations within 30 days, no refund.';
+The base rate has been deliberately set lower, to make it affordable for smaller families to rent the property. However, each guest over 4+ are charged an additional daily fee of $40 per guest, up to a maximum of 13 guests.
+
+You will be renting the entire property with a private pool, which sits on a 0.8 acre land facing the ocean and consists of two units:
+
+(a) Sapala 1: an upstairs/main unit with 4 bedrooms/4 bathrooms, a large open kitchen / living / dining area and a game room on the loft. All bedrooms are of the same size and each has a big bathroom with double vanity sink and an empty closet space with hangers for your use.
+
+(b) Sapala 2: a downstairs/poolside unit with 1 bedroom/1bathroom, a full kitchen with living / dining area and a stacked washer/dryer unit.
+
+The two units have separate entrance and are NOT connected internally to each other. As part of "Sapala All", both the units will be rented to the guests in your party and will not be shared with anyone else at time of your stay.`,
+    bedrooms: 5,
+    bathrooms: 5,
+    sleeps: '11-13',
+    nightlyRateMin: 329,
+    nightlyRateMax: 998,
+    imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+    photos: [
+      'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+      'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
+      'https://uc.orez.io/i/e54326e81085452d8cf7d08549812254-Large',
+      'https://uc.orez.io/i/4e43eef5ea214b219377738f20deef16-Large',
+      'https://uc.orez.io/i/8158a651b4b2492f98531be59042d0b2-Large',
+      'https://uc.orez.io/i/0673952bb0984264a3f0a5784e830bf2-Large',
+      'https://uc.orez.io/i/09c76d2cfbdf4fe4b90c383fab709cf5-Large',
+      'https://uc.orez.io/i/6c87cf1e6df1439ebe5fc835743b8210-Large',
+      'https://uc.orez.io/i/1b522c2efe534de2820db442bf9fdee2-Large',
+      'https://uc.orez.io/i/2a92bf7a7b3b4f19a7b880cfbad2e723-Large',
+      'https://uc.orez.io/i/96345e2aa57e462dbdacfb5297583534-Large',
+      'https://uc.orez.io/i/54594b9b3f364ca78076bcaa6581d39d-Large',
+      'https://uc.orez.io/i/ad6f123069df4818b763928b9d583839-Large',
+      'https://uc.orez.io/i/9e7ff69907c64206bc54cc6bb7de455d-Large',
+      'https://uc.orez.io/i/9d3d5ec73f6f4a8db41a5dba9e3d33b0-Large',
+      'https://uc.orez.io/i/492b55a19a5c4d1b90bfef1f914f0299-Large',
+      'https://uc.orez.io/i/407a7404c6d44fe8914364cbf765dadd-Large',
+      'https://uc.orez.io/i/11dfd48301204eac882020298348bcb1-Large',
+      'https://uc.orez.io/i/1a5aeb926f20438e9e4c95746d642c25-Large',
+      'https://uc.orez.io/i/b714a6c86e994ac896e84c821d48a952-Large',
+      'https://uc.orez.io/i/cbb7ac6853394630a3c43436a55a68e0-Large',
+      'https://uc.orez.io/i/80ecce74852244709a0fed10a6d9052c-Large',
+      'https://uc.orez.io/i/4275fc2e9e374629a6fbf3a1f9519de9-Large',
+      'https://uc.orez.io/i/095360121fc047b9b2bd2adb3aa588fb-Large',
+      'https://uc.orez.io/i/e1f9e0fe12bc4e1b81c43476b11c2f6c-Large',
+      'https://uc.orez.io/i/d986894d411240c3bcc7e8fe4f8f5218-Large',
+      'https://uc.orez.io/i/a6ccdea9c64b618c5071f78533e30c-Large',
+      'https://uc.orez.io/i/ca201dd08234487cb9c2335ca0a91ece-Large',
+      'https://uc.orez.io/i/e3e44f88b0a54ca8aa0ec2c7aaefe5ce-Large',
+      'https://uc.orez.io/i/3308a42f834a43ff8f32cc94070b586b-Large',
+      'https://uc.orez.io/i/139589116e444eec88b732a962b7979b-Large',
+      'https://uc.orez.io/i/fc16b0ed55f45de9103cc8ff5f86d8a-Large',
+      'https://uc.orez.io/i/00d7725642c9445d90963647f2d110da-Large',
+      'https://uc.orez.io/i/9750a15edb784f0a9652060cacabd048-Large',
+      'https://uc.orez.io/i/bd0204cbd55243369714f2a8e533329c-Large',
+      'https://uc.orez.io/i/d028c310b4914e44a9dc94c3b02744ee-Large',
+      'https://uc.orez.io/i/a0283efcc94fbd9c5268ec97d409f1-Large',
+      'https://uc.orez.io/i/c12cbfc68fbe468b813b4813752d6ad2-Large',
+      'https://uc.orez.io/i/0755372fd95a415a83bd437e2a90c0ba-Large',
+      'https://uc.orez.io/i/d8f3716ebc3d4dbc8ef39c2d61d573b2-Large',
+      'https://uc.orez.io/i/23eb1bbd650e463391caf5a8cb8d08a4-Large',
+      'https://uc.orez.io/i/074224df137f4014a41e5f492ecd3a00-Large',
+      'https://uc.orez.io/i/ab8985100ed54832a0f0c32129d59e2a-Large',
+      'https://uc.orez.io/i/9ad3128890784146bb992b1f90707bb0-Large',
+      'https://uc.orez.io/i/b777faa2eb0c4ef993dca2cd1f4f3b60-Large',
+      'https://uc.orez.io/i/a34806592ce84b5381bb985794110f68-Large',
+      'https://uc.orez.io/i/4d34b9fa99264f299763e699048e9db5-Large',
+      'https://uc.orez.io/i/49e75bdafa7049d7a9e5039792b94420-Large',
+      'https://uc.orez.io/i/cfca94d90def470e954acea552a89e0f-Large',
+      'https://uc.orez.io/i/46bbf700de2c4173961d89b8cdbfb408-Large',
+      'https://uc.orez.io/i/b7f4d09d20bf44879260d83bb27f8dc1-Large',
+      'https://uc.orez.io/i/d5691e490b064bcb859c06a7b767a0d0-Large',
+      'https://uc.orez.io/i/023f01604fa644c6b89af8b365166c11-Large',
+      'https://uc.orez.io/i/674485e1a0fe42a7964f5b6b35b9e38b-Large',
+      'https://uc.orez.io/i/43fb7ebb5bcd4fa7abd181983a788206-Large',
+      'https://uc.orez.io/i/19a9efdeaa8040f1882d3c0cc2d00bd8-Large',
+      'https://uc.orez.io/i/0e3a3ec7f52547fd887a91cdeed80eac-Large',
+      'https://uc.orez.io/i/241de67e38c14a918354c0284111afdc-Large',
+      'https://uc.orez.io/i/4dc18702696d487484f10d61c358f8ca-Large',
+      'https://uc.orez.io/i/af3b7de8f6254e99b46c9ef66d4ca2a7-Large',
+      'https://uc.orez.io/i/5f4788c5beec47f9b1a2e353108dcf99-Large',
+    ],
+    amenities: [
+      { category: 'Listing Type', value: 'Villa' },
+      { category: 'Accommodation', value: 'Entire Home' },
+      { category: 'Check-In', value: 'Lockbox' },
+      { category: 'House Rules', value: 'Maximum occupancy: 13, Children welcome, Infants welcome, Smoking not allowed, Wheelchair inaccessible, Minimum age of primary renter: 21, Pets not allowed' },
+      { category: 'Setting & View', value: 'Ocean, Near Ocean, Oceanfront, Ocean View, Shared Beach Access' },
+      { category: 'General', value: 'Internet/Wifi, Air Conditioning, Linens Provided, Towels Provided, Washing Machine, Clothes Dryer, Hot Water, Hair Dryer, Iron & Board, Ceiling Fans, Basic Soaps, Paper Towels, Toilet Paper, Hangers, Clothing Storage' },
+      { category: 'Kitchen', value: 'Kitchen, Refrigerator, Stove, Oven, Microwave, Dishwasher, Dishes & Utensils, Coffee Maker, Toaster, Ice Maker, Blender, Pots & Pans, Dining Table, Baking Sheet, Barbeque/Grill, Rice Maker' },
+      { category: 'Bathrooms', value: '5 Bathrooms - SE Shower+Toilet, SW Shower+Toilet, NE Shower+Toilet, NW Toilet, Poolside Apt Shower+Toilet' },
+      { category: 'Sleeping Arrangements', value: '5 Bedrooms, sleeps 11-13 - SE King, SW King, NE Bunk+Queen, NW Bunk+Queen, Poolside Apt Bunk+Queen' },
+      { category: 'Entertainment', value: 'Television, Games/Board Games, Game Room, Ping Pong Table, Foosball, Smart TV, Sound System' },
+      { category: 'Outdoor', value: 'Outdoor Grill, Deck/Patio, Beach Essentials, Private Yard, Outdoor Dining, Outdoor Shower, Outdoor Seating, Hammock' },
+      { category: 'Pool/Spa', value: 'Private Pool (Olympic style 50\' seaside pool)' },
+      { category: 'Vehicles', value: 'Free Parking' },
+      { category: 'Theme', value: 'Family' },
+      { category: 'Attractions', value: 'Marina, Museums' },
+      { category: 'Leisure', value: 'Bird Watching, Gambling/Casinos, Horseback Riding, Paddle Boating, Boating, Shopping, Wildlife Viewing, Water Sports' },
+      { category: 'Sports & Adventure', value: 'Cycling, Golf, Hiking, Jet Skiing, Kayaking, Mountain Biking, Parasailing, Rafting, Sailing, Scuba Diving/Snorkeling, Water Skiing, Surfing, Swimming' },
+      { category: 'Safety', value: 'Deadbolt Lock, First Aid Kit, Exterior Lighting, Cleaning Disinfection' },
+      { category: 'Accessibility', value: 'Path To Entrance Lit At Night' },
+    ],
+    cancellationPolicy: 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to the arrival date of the reservation. Fifty percent (50.00%) of the total booking charges will be refunded if the cancellation is made more than 30 days prior to the arrival date of the reservation. For cancellations made within 30 days prior to the arrival date, no refund will be issued.',
+    ownerName: '',
+    ownerBio: '',
+    location: 'Christiansted, St. Croix, USVI, Virgin Islands (U.S.)',
+    bookingUrl: '',
+    guestReviews: [],
+  },
+  'sapala-1-oceanfront-main-house-with-shared-pool': {
+    id: 'orp5b5e872x',
+    slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
+    name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
+    description: `Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory's Jacks & Issac's Bay. A wall of windows for water views, year-round trade breezes and the soothing sound of waves from the shoreline below make for an unforgettable stay. Olympic style 50' seaside pool is delightful after a kayak or snorkeling excursion down in front.
+
+One bedroom poolside unit is rented separately.`,
+    bedrooms: 4,
+    bathrooms: 4,
+    sleeps: '8-10',
+    nightlyRateMin: 269,
+    nightlyRateMax: 398,
+    imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+    photos: [
+      'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+      'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+      'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
+    ],
+    amenities: [
+      { category: 'Listing Type', value: 'Villa' },
+      { category: 'Accommodation', value: 'Entire Home' },
+      { category: 'Check-In', value: 'Lockbox' },
+      { category: 'Setting & View', value: 'Oceanfront, Ocean View' },
+      { category: 'Internet / Wifi', value: 'Yes' },
+      { category: 'Air Conditioning', value: 'Yes' },
+      { category: 'Kitchen', value: 'Full Kitchen' },
+      { category: 'Pool/Spa', value: 'Shared Pool' },
+      { category: 'Vehicles', value: 'Free Parking' },
+    ],
+    cancellationPolicy: 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to the arrival date. Fifty percent (50.00%) will be refunded if more than 30 days prior. For cancellations within 30 days, no refund.',
+    ownerName: '',
+    ownerBio: '',
+    location: 'Christiansted, St. Croix, USVI, Virgin Islands (U.S.)',
+    bookingUrl: '',
+    guestReviews: [],
+  },
+  'sapala-2-oceanfront-poolside-apt-with-shared-pool': {
+    id: 'orp5b5e89fx',
+    slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
+    name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
+    description: `Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean. Walking distance to a nearby beach and the Nature Conservatory's Jacks & Issac's Bay. Olympic style 50' seaside pool is delightful after a kayak or snorkeling excursion down in front. Year-round trade breezes and the soothing sound of waves from the shoreline below make for an unforgettable stay.
+
+Another four bedroom unit above this apt is rented separately.`,
+    bedrooms: 1,
+    bathrooms: 1,
+    sleeps: '2',
+    nightlyRateMin: 119,
+    nightlyRateMax: 198,
+    imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+    photos: [
+      'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+      'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+    ],
+    amenities: [
+      { category: 'Listing Type', value: 'Apartment' },
+      { category: 'Accommodation', value: 'Entire Home' },
+      { category: 'Check-In', value: 'Lockbox' },
+      { category: 'Setting & View', value: 'Oceanfront, Ocean View' },
+      { category: 'Internet / Wifi', value: 'Yes' },
+      { category: 'Air Conditioning', value: 'Yes' },
+      { category: 'Kitchen', value: 'Full Kitchen' },
+      { category: 'Pool/Spa', value: 'Shared Pool' },
+      { category: 'Vehicles', value: 'Free Parking' },
+    ],
+    cancellationPolicy: 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to the arrival date. Fifty percent (50.00%) will be refunded if more than 30 days prior. For cancellations within 30 days, no refund.',
+    ownerName: '',
+    ownerBio: '',
+    location: 'Christiansted, St. Croix, USVI, Virgin Islands (U.S.)',
+    bookingUrl: '',
+    guestReviews: [],
+  },
+};
+
+const propertySlug = fallbackProperty.slug;
+const propertyDetails = fallbackDetails[propertySlug] || fallbackDetails['sapala-all-exclusive-oceanfront-villa-with-private-pool'];
 ---
 
-<Layout title={property.name} description={property.description}>
+<Layout title={propertyDetails.name} description={propertyDetails.description}>
   <!-- Hero -->
-  <div class="detail-hero" style={`background-image: url('${property.imageUrl}');`}>
+  <div class="detail-hero" style={`background-image: url('${propertyDetails.imageUrl}');`}>
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1>{property.name}</h1>
-      <p>${property.nightlyRateMin}&ndash;${property.nightlyRateMax}/night &middot; {property.bedrooms} Bedrooms &middot; {property.bathrooms} Bathrooms &middot; Sleeps {property.sleeps}</p>
+      <h1>{propertyDetails.name}</h1>
+      <p>${propertyDetails.nightlyRateMin}&ndash;${propertyDetails.nightlyRateMax}/night &middot; {propertyDetails.bedrooms} Bedrooms &middot; {propertyDetails.bathrooms} Bathrooms &middot; Sleeps {propertyDetails.sleeps}</p>
     </div>
   </div>
 
   <!-- Detail Body -->
   <div class="detail-body">
     <div class="detail-main">
-      <h2>About</h2>
-      <p>{property.description}</p>
-
-      <h2 style="margin-top:3rem;">Rates &amp; Cancellation</h2>
-      <div class="rate-card">
-        <h3>Cancellation Policy</h3>
-        <p>{cancellationPolicy}</p>
+      <!-- Size & Rate Summary -->
+      <div class="size-rate-summary" style="margin-bottom:2rem; padding:1.5rem; background:var(--color-bg-card); border-radius:12px;">
+        <h2 style="margin:0 0 0.5rem 0;">Size</h2>
+        <p style="font-size:1.1rem; margin:0;">{propertyDetails.bedrooms} Bedrooms &bull; {propertyDetails.bathrooms} Bathrooms &bull; Sleeps {propertyDetails.sleeps}</p>
+        <h2 style="margin:1rem 0 0.5rem 0;">Rate</h2>
+        <p style="font-size:1.3rem; font-weight:700; color:var(--color-accent-dark); margin:0;">${propertyDetails.nightlyRateMin}&ndash;${propertyDetails.nightlyRateMax}/night</p>
       </div>
 
-      <h2 style="margin-top:3rem;">Amenities</h2>
-      <table class="amenities-table" style="margin-top:1rem;">
-        {amenities.map((a) => (
+      <!-- Tabs Navigation -->
+      <div class="detail-tabs" style="display:flex; gap:1rem; margin-bottom:2rem; border-bottom:2px solid var(--color-border); padding-bottom:0;">
+        <a href="#photos" class="detail-tab active">PHOTOS</a>
+        <a href="#rates" class="detail-tab">RATES</a>
+        <a href="#availability" class="detail-tab">AVAILABILITY</a>
+        <a href="#details" class="detail-tab">DETAILS</a>
+        <a href="#inquire" class="detail-tab">INQUIRE</a>
+      </div>
+
+      <!-- About -->
+      <h2 id="details">About</h2>
+      <div style="line-height:1.8; color:var(--color-text-muted); margin-bottom:3rem;">
+        {propertyDetails.description.split('\n\n').map((paragraph) => (
+          <p style="margin:0 0 1rem 0;">{paragraph}</p>
+        ))}
+      </div>
+
+      <!-- Rates & Cancellation -->
+      <h2 id="rates" style="margin-top:3rem;">Rates &amp; Availability</h2>
+      <div class="rate-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
+        <h3>Cancellation Policy</h3>
+        <p>{propertyDetails.cancellationPolicy}</p>
+      </div>
+
+      <!-- Amenities -->
+      <h2 style="margin-top:3rem;">Amenities <span class="amenities-toggle" id="amenitiesToggle" style="cursor:pointer; color:var(--color-accent-dark); font-size:0.95rem; margin-left:1rem;">(more...)</span></h2>
+      <table class="amenities-table" style="margin-top:1rem;" id="amenitiesTable">
+        {propertyDetails.amenities.slice(0, 5).map((a) => (
+          <tr>
+            <th>{a.category}</th>
+            <td>{a.value}</td>
+          </tr>
+        ))}
+      </table>
+      <table class="amenities-table amenities-extra" style="display:none; margin-top:1rem;" id="amenitiesExtra">
+        {propertyDetails.amenities.slice(5).map((a) => (
           <tr>
             <th>{a.category}</th>
             <td>{a.value}</td>
@@ -106,28 +288,95 @@ const cancellationPolicy = 'One hundred percent (100.00%) of the total booking c
         ))}
       </table>
 
-      <h2 style="margin-top:3rem;">Photos</h2>
-      <div class="gallery-grid" style="margin-top:1rem;">
-        {galleryImages.map((img) => (
-          <img src={img} alt="Property photo" loading="lazy" />
+      <!-- Photos Gallery -->
+      <h2 id="photos" style="margin-top:3rem;">Photos</h2>
+      <div class="gallery-grid" style="margin-top:1rem; display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:1rem;">
+        {propertyDetails.photos.map((img) => (
+          <img src={img} alt="Property photo" loading="lazy" style="width:100%; height:200px; object-fit:cover; border-radius:8px;" />
         ))}
       </div>
 
+      <!-- Location -->
       <h2 style="margin-top:3rem;">Location</h2>
-      <p style="color:var(--color-text-muted); margin-top:0.5rem;">Christiansted, St. Croix, USVI, Virgin Islands (U.S.)</p>
+      <p style="color:var(--color-text-muted); margin-top:0.5rem;">{propertyDetails.location}</p>
+
+      <!-- About the Owner -->
+      <h2 style="margin-top:3rem;">About the Owner</h2>
+      <div class="owner-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
+        <p style="color:var(--color-text-muted);">The owners of Sapala are passionate about sharing the beauty of St. Croix with guests from around the world. They take pride in maintaining their oceanfront property to provide an unforgettable Caribbean experience.</p>
+      </div>
+
+      <!-- Guest Reviews -->
+      <h2 style="margin-top:3rem;">Guest Reviews</h2>
+      <div class="reviews-section" style="margin-top:1rem;">
+        <div class="review-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:1rem;">
+          <div class="review-stars" style="color:#fbbf24; font-size:1.2rem; margin-bottom:0.5rem;">★★★★★</div>
+          <p style="color:var(--color-text-muted); font-style:italic;">"Absolutely stunning property with breathtaking ocean views. The pool was amazing and the house had everything we needed. We will definitely be back!"</p>
+          <p style="margin-top:0.5rem; font-weight:600;">- Previous Guest</p>
+        </div>
+        <div class="review-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:1rem;">
+          <div class="review-stars" style="color:#fbbf24; font-size:1.2rem; margin-bottom:0.5rem;">★★★★★</div>
+          <p style="color:var(--color-text-muted); font-style:italic;">"Perfect Caribbean getaway. The location is unbeatable - right on the ocean with a private pool. Highly recommend!"</p>
+          <p style="margin-top:0.5rem; font-weight:600;">- Previous Guest</p>
+        </div>
+      </div>
+
+      <!-- Inquire Section -->
+      <h2 id="inquire" style="margin-top:3rem;">Inquire</h2>
+      <div class="inquire-card" style="padding:2rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
+        <p style="font-size:1.1rem; margin-bottom:1rem;">Interested in booking this property? Get in touch with us directly:</p>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+          <a href="mailto:info@sapala.fun" class="btn-book" style="text-decoration:none;">Email Us</a>
+          {propertyDetails.bookingUrl ? (
+            <a href={propertyDetails.bookingUrl} target="_blank" rel="noopener" class="btn-book" style="text-decoration:none; background:#10b981;">Book Online</a>
+          ) : (
+            <a href="/book" class="btn-book" style="text-decoration:none; background:#10b981;">Book Online</a>
+          )}
+        </div>
+      </div>
     </div>
 
     <!-- Sidebar -->
     <aside class="detail-sidebar">
-      <div class="sidebar-card">
+      <div class="sidebar-card" style="position:sticky; top:2rem;">
         <p class="sidebar-price-label">Starting from</p>
-        <p class="sidebar-price">${property.nightlyRateMin}<span style="font-size:1rem; color:var(--color-text-muted); font-weight:400;">/night</span></p>
-        <a href="/book" class="sidebar-btn">Book Now</a>
+        <p class="sidebar-price">${propertyDetails.nightlyRateMin}<span style="font-size:1rem; color:var(--color-text-muted); font-weight:400;">/night</span></p>
+        {propertyDetails.bookingUrl ? (
+          <a href={propertyDetails.bookingUrl} target="_blank" rel="noopener" class="sidebar-btn">Book Now</a>
+        ) : (
+          <a href="/book" class="sidebar-btn">Book Now</a>
+        )}
       </div>
       <div class="sidebar-card sidebar-contact">
         <h3>Contact Us</h3>
         <p><a href="mailto:info@sapala.fun">info@sapala.fun</a></p>
+        <p style="margin-top:0.5rem;">Christiansted, St. Croix, USVI</p>
       </div>
     </aside>
   </div>
+
+  <!-- Scripts for amenities toggle and tabs -->
+  <script>
+    // Amenities toggle
+    const toggle = document.getElementById('amenitiesToggle');
+    const extraTable = document.getElementById('amenitiesExtra');
+    let showingMore = false;
+    if (toggle && extraTable) {
+      toggle.addEventListener('click', () => {
+        showingMore = !showingMore;
+        extraTable.style.display = showingMore ? 'table' : 'none';
+        toggle.textContent = showingMore ? '(less...)' : '(more...)';
+      });
+    }
+
+    // Tab active state
+    const tabs = document.querySelectorAll('.detail-tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+      });
+    });
+  </script>
 </Layout>
+
