@@ -93,17 +93,10 @@ func propertiesHandler(c *gin.Context, client *ownerrez.Client) {
 
 	properties, err := client.GetProperties()
 	if err != nil {
-		c.JSON(200, gin.H{
-			"properties": []gin.H{{
-				"id":          "sample-property",
-				"name":        "Ocean View Retreat",
-				"slug":        "ocean-view-retreat",
-				"nightlyRate": 210,
-				"bedrooms":    2,
-				"bathrooms":   2,
-				"description": "Fallback property payload served by Go.",
-			}},
-			"warning": err.Error(),
+		c.JSON(503, gin.H{
+			"error":     "ownerrez API unavailable",
+			"warning":   err.Error(),
+			"properties": []gin.H{},
 		})
 		return
 	}
