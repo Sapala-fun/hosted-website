@@ -294,6 +294,29 @@ const propertyDetails = await getPropertyDetails(slug);
         </>
       ) : null}
 
+      <!-- Availability Calendar Section -->
+      <h2 id="availability" style="margin-top:3rem;">Availability Calendar</h2>
+      <div class="availability-calendar" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:2rem;">
+        <div class="calendar-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+          <h3 id="calendarMonthYear" style="margin:0; font-size:1.2rem;">Loading...</h3>
+          <div style="display:flex; gap:0.5rem;">
+            <button type="button" id="prevMonthBtn" class="btn-month-nav" style="padding:0.4rem 0.8rem; border:none; background:#e5e7eb; cursor:pointer; border-radius:6px;">< Prev</button>
+            <button type="button" id="nextMonthBtn" class="btn-month-nav" style="padding:0.4rem 0.8rem; border:none; background:#e5e7eb; cursor:pointer; border-radius:6px;">Next ></button>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:0.25rem; text-align:center;">
+          <div style="font-weight:600; padding:0.5rem 0;">Sun</div>
+          <div style="font-weight:600; padding:0.5rem 0;">Mon</div>
+          <div style="font-weight:600; padding:0.5rem 0;">Tue</div>
+          <div style="font-weight:600; padding:0.5rem 0;">Wed</div>
+          <div style="font-weight:600; padding:0.5rem 0;">Thu</div>
+          <div style="font-weight:600; padding:0.5rem 0;">Fri</div>
+          <div style="font-weight:600; padding:0.5rem 0;">Sat</div>
+        </div>
+        <div id="calendarGrid" class="calendar-grid" style="display:grid; grid-template-columns:repeat(7,1fr); gap:0.25rem;"></div>
+        <p id="availabilityNote" style="margin-top:1rem; font-size:0.9rem; color:var(--color-text-muted);"></p>
+      </div>
+
       <!-- Inquire Section -->
       <h2 id="inquire" style="margin-top:3rem;">Inquire</h2>
       <div class="inquire-card" style="padding:2rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
@@ -350,5 +373,114 @@ const propertyDetails = await getPropertyDetails(slug);
         tab.classList.add('active');
       });
     });
+
+    // Availability calendar logic
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth() + 1; // 1-indexed (1-12)
+    
+    async function loadAvailability(year, month) {
+      const calendarGrid = document.getElementById('calendarGrid');
+      const calendarMonthYear = document.getElementById('calendarMonthYear');
+      
+      if (!calendarGrid || !calendarMonthYear) return;
+      
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/availability/${slug}?year=${year}&month=${month}`);
+        if (res.ok) {
+          const data = await res.json();
+          calendarMonthYear.textContent = new Date(year, month - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+          
+          // Build the calendar
+          const firstDay = new Date(year, month - 1, 1);
+          const lastDate = new Date(year, month, 0).getDate();
+          const startDay = firstDay.getDay(); // 0-6 (Sun-Sat)
+          
+          // Clear grid
+          calendarGrid.innerHTML = '';
+          
+          // Add empty cells for days before the 1st of the month
+          for (let i = 0; i < startDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.style.height = '4rem';
+            emptyCell.style.borderRadius = '4px';
+            calendarGrid.appendChild(emptyCell);
+          }
+          
+          // Add date cells
+          const dates = data.dates || [];
+          for (let day = 1; day <= lastDate; day++) {
+            const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isWeekend = [0, 6].includes(new Date(year, month - 1, day).getDay());
+            
+            const cell = document.createElement('div');
+            cell.style.padding = '0.5rem';
+            cell.style.borderRadius = '4px';
+            cell.style.fontSize = '0.85rem';
+            cell.style.position = 'relative';
+            
+            // Find if this date has availability info
+            const dateInfo = dates.find(d => d.date === dateStr);
+            
+            if (dateInfo && dateInfo.blocked) {
+              cell.style.background = '#fee2e2'; // Red tint for blocked
+              cell.style.color = '#b91c1c';
+              cell.title = `${dateInfo.reason || 'Reserved'}`;
+            } else {
+              cell.style.background = isWeekend ? '#fef3c7' : '#d1fae5'; // Yellow for weekends, green for weekdays
+              cell.style.color = isWeekend ? '#92400e' : '#065f46';
+              if (dateInfo && dateInfo.nightlyRate) {
+                cell.innerHTML = `<strong>${day}</strong><br><small>$${Math.round(dateInfo.nightlyRate)}</small>`;
+              } else {
+                cell.innerHTML = `<strong>${day}</strong>`;
+              }
+            }
+            
+            calendarGrid.appendChild(cell);
+          }
+          
+          // Update note
+          const availableDates = dates.filter(d => !d.blocked).length;
+          const totalDates = dates.length || lastDate;
+          document.getElementById('availabilityNote').textContent = 
+            `${availableDates} of ${totalDates} days available in this month`;
+        } else {
+          calendarMonthYear.textContent = 'Availability unavailable';
+          document.getElementById('calendarGrid').innerHTML = '<p style="color:#ef4444;">Could not load availability data</p>';
+        }
+      } catch (error) {
+        console.error('Error loading availability:', error);
+        calendarMonthYear.textContent = 'Availability unavailable';
+        document.getElementById('calendarGrid').innerHTML = '<p style="color:#ef4444;">Error loading data</p>';
+      }
+    }
+
+    // Load current month when page loads
+    loadAvailability(currentYear, currentMonth);
+
+    // Month navigation buttons
+    const prevBtn = document.getElementById('prevMonthBtn');
+    const nextBtn = document.getElementById('nextMonthBtn');
+    
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        currentMonth--;
+        if (currentMonth < 1) {
+          currentMonth = 12;
+          currentYear--;
+        }
+        loadAvailability(currentYear, currentMonth);
+      });
+    }
+    
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        currentMonth++;
+        if (currentMonth > 12) {
+          currentMonth = 1;
+          currentYear++;
+        }
+        loadAvailability(currentYear, currentMonth);
+      });
+    }
   </script>
 </Layout>

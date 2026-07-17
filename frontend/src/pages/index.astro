@@ -165,7 +165,8 @@ const features = [
     </div>
     <div class="property-grid">
       {properties.map((prop) => (
-        <a href={`/${prop.slug}`} class="property-card">
+        <!-- Use slug if available (URL-friendly), otherwise fall back to id -->
+        <a href={`/${prop.slug || prop.id}`} class="property-card">
           <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
             <span class="property-card-badge">{prop.bedrooms} BR</span>
           </div>

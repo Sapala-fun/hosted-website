@@ -94,8 +94,8 @@ func propertiesHandler(c *gin.Context, client *ownerrez.Client) {
 	properties, err := client.GetProperties()
 	if err != nil {
 		c.JSON(503, gin.H{
-			"error":     "ownerrez API unavailable",
-			"warning":   err.Error(),
+			"error":      "ownerrez API unavailable",
+			"warning":    err.Error(),
 			"properties": []gin.H{},
 		})
 		return
@@ -136,14 +136,14 @@ func propertyDetailsHandler(c *gin.Context, client *ownerrez.Client) {
 	if err != nil {
 		c.JSON(200, gin.H{
 			"details": gin.H{
-				"id":          slug,
-				"name":        slug,
-				"slug":        slug,
-				"description": "Property details unavailable.",
+				"id":             slug,
+				"name":           slug,
+				"slug":           slug,
+				"description":    "Property details unavailable.",
 				"nightlyRateMin": 0,
 				"nightlyRateMax": 0,
-				"bedrooms":     0,
-				"bathrooms":    0,
+				"bedrooms":       0,
+				"bathrooms":      0,
 			},
 			"warning": err.Error(),
 		})
@@ -163,11 +163,11 @@ func bookHandler(c *gin.Context, client *ownerrez.Client) {
 	result, err := client.CreateBooking(payload)
 	if err != nil {
 		c.JSON(200, gin.H{
-			"message":  "Booking request received",
+			"message":   "Booking request received",
 			"guestName": payload["guestName"],
-			"checkIn":  payload["checkIn"],
-			"checkOut": payload["checkOut"],
-			"note":     err.Error(),
+			"checkIn":   payload["checkIn"],
+			"checkOut":  payload["checkOut"],
+			"note":      err.Error(),
 		})
 		return
 	}
@@ -201,10 +201,10 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 	properties, err := client.GetProperties()
 	if err != nil {
 		c.JSON(200, gin.H{
-			"dates":  []ownerrez.AvailabilityDate{},
-			"slug":   slug,
-			"year":   year,
-			"month":  month,
+			"dates":   []ownerrez.AvailabilityDate{},
+			"slug":    slug,
+			"year":    year,
+			"month":   month,
 			"warning": err.Error(),
 		})
 		return
@@ -213,6 +213,7 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 	var propertyID int
 	var nightlyRate float64
 	for _, prop := range properties {
+		// Check for slug field first (if present in API response)
 		if s, ok := prop["slug"].(string); ok && s == slug {
 			if id, ok := prop["id"].(float64); ok {
 				propertyID = int(id)
@@ -221,6 +222,21 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 				nightlyRate = nr
 			}
 			break
+		}
+		// Fallback: check public_url for slug match (OwnerRez API doesn't return explicit slug)
+		if s, ok := prop["public_url"].(string); ok {
+			// Extract slug from public_url like "https://www.sapala.fun/sapala-all-.../orp5b5eae5x"
+			// or just check if the public_url starts with our expected path
+			expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
+			if len(s) > len(expectedUrl) && s[:len(expectedUrl)] == expectedUrl {
+				if id, ok := prop["id"].(float64); ok {
+					propertyID = int(id)
+				}
+				if nr, ok := prop["nightlyRate"].(float64); ok {
+					nightlyRate = nr
+				}
+				break
+			}
 		}
 	}
 
@@ -249,10 +265,10 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 	}
 
 	c.JSON(200, gin.H{
-		"dates":  dates,
-		"slug":   slug,
-		"year":   year,
-		"month":  month,
+		"dates":      dates,
+		"slug":       slug,
+		"year":       year,
+		"month":      month,
 		"propertyID": propertyID,
 	})
 }

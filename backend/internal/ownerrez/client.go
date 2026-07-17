@@ -2,6 +2,7 @@ package ownerrez
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -9,30 +10,37 @@ import (
 )
 
 type Client struct {
-	BaseURL string
-	APIKey  string
-	Token   string // Personal token (current), will switch to OAuth later
+	BaseURL    string
+	APIKey     string
+	Token      string // Personal token (current), will switch to OAuth later
+	OwnerEmail string
 }
 
 func NewClient() *Client {
 	return &Client{
-		BaseURL: os.Getenv("OWNERREZ_API_BASE_URL"),
-		APIKey:  os.Getenv("OWNERREZ_API_KEY"),
-		Token:   os.Getenv("OWNERREZ_PERSONAL_TOKEN"),
+		BaseURL:    os.Getenv("OWNERREZ_API_BASE_URL"),
+		APIKey:     os.Getenv("OWNERREZ_API_KEY"),
+		Token:      os.Getenv("OWNERREZ_PERSONAL_TOKEN"),
+		OwnerEmail: os.Getenv("OWNERREZ_EMAIL"),
 	}
 }
 
 // authHeader returns the appropriate Authorization header based on available credentials.
-// Priority: Personal Token > API Key (HTTP Basic) > OAuth Token
+// Priority for Personal Access Tokens (pt_...): Basic Auth (email + token) > OAuth Token
+// Priority for API Keys: HTTP Basic (base64 encoded)
 func (c *Client) authHeader() string {
-	if c.Token != "" {
+	// If we have a personal access token, use HTTP Basic Auth with email as username
+	if c.Token != "" && c.Token[:3] == "pt_" && c.OwnerEmail != "" {
+		auth := c.OwnerEmail + ":" + c.Token
+		return "Basic " + base64.StdEncoding.EncodeToString([]byte(auth))
+	}
+	if c.Token != "" && c.Token[:3] == "at_" {
+		// OAuth Token (bearer)
 		return "Bearer " + c.Token
 	}
 	if c.APIKey != "" {
+		// API Key for HTTP Basic auth - already base64 encoded by user
 		return "Basic " + c.APIKey
-	}
-	if c.Token != "" {
-		return "Bearer " + c.Token
 	}
 	return ""
 }
@@ -60,13 +68,13 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 	}
 
 	var payload struct {
-		Data []map[string]any `json:"data"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	return payload.Data, nil
+	return payload.Items, nil
 }
 
 func (c *Client) GetProperty(slug string) (map[string]any, error) {
@@ -92,15 +100,23 @@ func (c *Client) GetProperty(slug string) (map[string]any, error) {
 	}
 
 	var payload struct {
-		Data []map[string]any `json:"data"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	for _, prop := range payload.Data {
+	for _, prop := range payload.Items {
+		// Check for slug field first (if present in API response)
 		if s, ok := prop["slug"].(string); ok && s == slug {
 			return prop, nil
+		}
+		// Fallback: check public_url for slug match (OwnerRez API doesn't return explicit slug)
+		expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
+		if s, ok := prop["public_url"].(string); ok {
+			if len(s) > len(expectedUrl) && s[:len(expectedUrl)] == expectedUrl {
+				return prop, nil
+			}
 		}
 	}
 	return nil, fmt.Errorf("property not found: %s", slug)
@@ -143,32 +159,32 @@ func (c *Client) CreateBooking(payload map[string]string) (map[string]any, error
 
 // AvailabilityDate represents a single date in the availability calendar.
 type AvailabilityDate struct {
-	Date     string `json:"date"`
-	Blocked  bool   `json:"blocked"`
-	Reason   string `json:"reason,omitempty"`
+	Date        string  `json:"date"`
+	Blocked     bool    `json:"blocked"`
+	Reason      string  `json:"reason,omitempty"`
 	NightlyRate float64 `json:"nightlyRate,omitempty"`
 }
 
 // PropertyDetails represents enriched property data fetched from OwnerRez.
 type PropertyDetails struct {
-	ID                string   `json:"id"`
-	Slug              string   `json:"slug"`
-	Name              string   `json:"name"`
-	Description       string   `json:"description"`
-	Bedrooms          int      `json:"bedrooms"`
-	Bathrooms         int      `json:"bathrooms"`
-	Sleeps            string   `json:"sleeps"`
-	NightlyRateMin    float64  `json:"nightlyRateMin"`
-	NightlyRateMax    float64  `json:"nightlyRateMax"`
-	ImageUrl          string   `json:"imageUrl"`
-	Photos            []string `json:"photos"`
-	Amenities         []map[string]string `json:"amenities"`
-	CancellationPolicy string   `json:"cancellationPolicy"`
-	OwnerName         string   `json:"ownerName"`
-	OwnerBio          string   `json:"ownerBio"`
-	Location          string   `json:"location"`
-	BookingURL        string   `json:"bookingUrl"`
-	GuestReviews      []map[string]string `json:"guestReviews"`
+	ID                 string              `json:"id"`
+	Slug               string              `json:"slug"`
+	Name               string              `json:"name"`
+	Description        string              `json:"description"`
+	Bedrooms           int                 `json:"bedrooms"`
+	Bathrooms          int                 `json:"bathrooms"`
+	Sleeps             string              `json:"sleeps"`
+	NightlyRateMin     float64             `json:"nightlyRateMin"`
+	NightlyRateMax     float64             `json:"nightlyRateMax"`
+	ImageUrl           string              `json:"imageUrl"`
+	Photos             []string            `json:"photos"`
+	Amenities          []map[string]string `json:"amenities"`
+	CancellationPolicy string              `json:"cancellationPolicy"`
+	OwnerName          string              `json:"ownerName"`
+	OwnerBio           string              `json:"ownerBio"`
+	Location           string              `json:"location"`
+	BookingURL         string              `json:"bookingUrl"`
+	GuestReviews       []map[string]string `json:"guestReviews"`
 }
 
 // GetPropertyDetails fetches enriched property details from OwnerRez API.
@@ -195,15 +211,29 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 	}
 
 	var payload struct {
-		Data []map[string]any `json:"data"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	for _, prop := range payload.Data {
-		s, ok := prop["slug"].(string)
-		if !ok || s != slug {
+	expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
+
+	for _, prop := range payload.Items {
+		// Check for slug field first (if present in API response)
+		var propSlug string
+		if s, ok := prop["slug"].(string); ok && s == slug {
+			propSlug = s
+		} else if pubUrl, ok := prop["public_url"].(string); ok {
+			// Fallback: check public_url for slug match (OwnerRez API doesn't return explicit slug)
+			if len(pubUrl) > len(expectedUrl) && pubUrl[:len(expectedUrl)] == expectedUrl {
+				propSlug = slug
+			} else if pubUrl[len(pubUrl)-len(slug):] == slug {
+				propSlug = slug
+			}
+		}
+
+		if propSlug == "" {
 			continue
 		}
 
@@ -307,7 +337,7 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 				parts = append(parts, country)
 			}
 			if len(parts) > 0 {
-				location = "" + parts[0]
+				location = parts[0]
 				for i := 1; i < len(parts); i++ {
 					location += ", " + parts[i]
 				}
@@ -345,24 +375,24 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 		}
 
 		return &PropertyDetails{
-			ID:                fmt.Sprintf("%v", prop["id"]),
-			Slug:              s,
-			Name:              getString(prop, "name"),
-			Description:       getString(prop, "description"),
-			Bedrooms:          bedrooms,
-			Bathrooms:         bathrooms,
-			Sleeps:            sleeps,
-			NightlyRateMin:    nightlyRateMin,
-			NightlyRateMax:    nightlyRateMax,
-			ImageUrl:          imageUrl,
-			Photos:            photos,
-			Amenities:         amenities,
+			ID:                 fmt.Sprintf("%v", prop["id"]),
+			Slug:               propSlug,
+			Name:               getString(prop, "name"),
+			Description:        getString(prop, "description"),
+			Bedrooms:           bedrooms,
+			Bathrooms:          bathrooms,
+			Sleeps:             sleeps,
+			NightlyRateMin:     nightlyRateMin,
+			NightlyRateMax:     nightlyRateMax,
+			ImageUrl:           imageUrl,
+			Photos:             photos,
+			Amenities:          amenities,
 			CancellationPolicy: cancellationPolicy,
-			OwnerName:         ownerName,
-			OwnerBio:          ownerBio,
-			Location:          location,
-			BookingURL:        bookingURL,
-			GuestReviews:      guestReviews,
+			OwnerName:          ownerName,
+			OwnerBio:           ownerBio,
+			Location:           location,
+			BookingURL:         bookingURL,
+			GuestReviews:       guestReviews,
 		}, nil
 	}
 
