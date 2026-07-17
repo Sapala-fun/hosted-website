@@ -17,6 +17,7 @@ dev-separate: ## Run backend and frontend as two separate processes (with hot-re
 	@echo ""
 	@echo "Visit http://localhost:4321 for the Astro dev server (hot-reload enabled)"
 	@echo "API is at http://localhost:3001"
+	@./scripts/dev-separate.sh
 
 build-backend: ## Build the Go backend binary
 	@cd backend && go build -o ../bin/ownerrez-proxy .
