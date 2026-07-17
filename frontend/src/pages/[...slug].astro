@@ -33,7 +33,7 @@ interface PropertyDetails {
   guestReviews: Array<{ comment: string; author: string }>;
 }
 
-// Fallback data for all properties (in case API fails)
+// Fallback data for all properties (used during build or if API fails)
 const fallbackDetails: Record<string, PropertyDetails> = {
   'sapala-all-exclusive-oceanfront-villa-with-private-pool': {
     id: 'orp5b5eae5x',
@@ -149,6 +149,14 @@ Another four bedroom unit above this apt is rented separately.`,
 const fallbackPropertyData = fallbackDetails[slug] || fallbackDetails['sapala-all-exclusive-oceanfront-villa-with-private-pool'];
 
 async function getPropertyDetails(slug: string): Promise<PropertyDetails> {
+  // Check if we're in build mode and backend isn't available
+  // In this case, use fallback data directly
+  const useFallback = import.meta.env.SSR && !import.meta.env.DEV;
+  
+  if (useFallback) {
+    return fallbackPropertyData;
+  }
+  
   try {
     const res = await fetch(`${apiBaseUrl}/api/property/${slug}/details`, { 
       signal: AbortSignal.timeout(10000) 

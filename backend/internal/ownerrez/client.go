@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 )
 
 type Client struct {
@@ -68,13 +69,13 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 	}
 
 	var payload struct {
-		Items []map[string]any `json:"items"`
+		Properties []map[string]any `json:"properties"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	return payload.Items, nil
+	return payload.Properties, nil
 }
 
 func (c *Client) GetProperty(slug string) (map[string]any, error) {
@@ -100,13 +101,13 @@ func (c *Client) GetProperty(slug string) (map[string]any, error) {
 	}
 
 	var payload struct {
-		Items []map[string]any `json:"items"`
+		Properties []map[string]any `json:"properties"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	for _, prop := range payload.Items {
+	for _, prop := range payload.Properties {
 		// Check for slug field first (if present in API response)
 		if s, ok := prop["slug"].(string); ok && s == slug {
 			return prop, nil
@@ -211,7 +212,7 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 	}
 
 	var payload struct {
-		Items []map[string]any `json:"items"`
+		Properties []map[string]any `json:"properties"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
@@ -219,17 +220,21 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 
 	expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
 
-	for _, prop := range payload.Items {
+	for _, prop := range payload.Properties {
 		// Check for slug field first (if present in API response)
 		var propSlug string
 		if s, ok := prop["slug"].(string); ok && s == slug {
 			propSlug = s
 		} else if pubUrl, ok := prop["public_url"].(string); ok {
 			// Fallback: check public_url for slug match (OwnerRez API doesn't return explicit slug)
+			// The URL format is: https://www.sapala.fun/slug-orpsomething
 			if len(pubUrl) > len(expectedUrl) && pubUrl[:len(expectedUrl)] == expectedUrl {
 				propSlug = slug
-			} else if pubUrl[len(pubUrl)-len(slug):] == slug {
-				propSlug = slug
+			} else if idx := strings.Index(pubUrl, "-or"); idx > 0 && idx+len("-or") < len(pubUrl) {
+				// Extract slug from URL (format: https://www.sapala.fun/slug-orpsomething)
+				if prefix := pubUrl[:idx]; prefix == expectedUrl {
+					propSlug = slug
+				}
 			}
 		}
 
@@ -447,7 +452,7 @@ func (c *Client) GetAvailability(propertyID int, year int, month int) ([]Availab
 	}
 
 	var payload struct {
-		Items []map[string]any `json:"items"`
+		Properties []map[string]any `json:"properties"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
@@ -455,7 +460,7 @@ func (c *Client) GetAvailability(propertyID int, year int, month int) ([]Availab
 
 	// Build a map of blocked dates from bookings
 	blockedDates := make(map[string]string) // date -> reason
-	for _, item := range payload.Items {
+	for _, item := range payload.Properties {
 		status, _ := item["status"].(string)
 		if status != "active" && status != "pending" {
 			continue
