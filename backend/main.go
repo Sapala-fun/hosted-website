@@ -28,6 +28,12 @@ func corsMiddleware() gin.HandlerFunc {
 }
 
 func main() {
+	// Debug: print environment variables to verify loading
+	log.Printf("OWNERREZ_EMAIL=%s", os.Getenv("OWNERREZ_EMAIL"))
+	log.Printf("OWNERREZ_API_KEY=%s", os.Getenv("OWNERREZ_API_KEY"))
+	log.Printf("OWNERREZ_PERSONAL_TOKEN=%s", os.Getenv("OWNERREZ_PERSONAL_TOKEN"))
+	log.Printf("OWNERREZ_API_BASE_URL=%s", os.Getenv("OWNERREZ_API_BASE_URL"))
+
 	client := ownerrez.NewClient()
 
 	gin.SetMode(gin.ReleaseMode)

@@ -17,12 +17,20 @@ type Client struct {
 	OwnerEmail string
 }
 
+// stripQuotes removes surrounding double quotes from a string if present
+func stripQuotes(s string) string {
+	if len(s) >= 2 && s[0] == '"' && s[len(s)-1] == '"' {
+		return s[1 : len(s)-1]
+	}
+	return s
+}
+
 func NewClient() *Client {
 	return &Client{
-		BaseURL:    os.Getenv("OWNERREZ_API_BASE_URL"),
-		APIKey:     os.Getenv("OWNERREZ_API_KEY"),
-		Token:      os.Getenv("OWNERREZ_PERSONAL_TOKEN"),
-		OwnerEmail: os.Getenv("OWNERREZ_EMAIL"),
+		BaseURL:    stripQuotes(os.Getenv("OWNERREZ_API_BASE_URL")),
+		APIKey:     stripQuotes(os.Getenv("OWNERREZ_API_KEY")),
+		Token:      stripQuotes(os.Getenv("OWNERREZ_PERSONAL_TOKEN")),
+		OwnerEmail: stripQuotes(os.Getenv("OWNERREZ_EMAIL")),
 	}
 }
 
@@ -69,13 +77,13 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 	}
 
 	var payload struct {
-		Properties []map[string]any `json:"properties"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	return payload.Properties, nil
+	return payload.Items, nil
 }
 
 func (c *Client) GetProperty(slug string) (map[string]any, error) {
@@ -101,13 +109,13 @@ func (c *Client) GetProperty(slug string) (map[string]any, error) {
 	}
 
 	var payload struct {
-		Properties []map[string]any `json:"properties"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
-	for _, prop := range payload.Properties {
+	for _, prop := range payload.Items {
 		// Check for slug field first (if present in API response)
 		if s, ok := prop["slug"].(string); ok && s == slug {
 			return prop, nil
@@ -212,7 +220,7 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 	}
 
 	var payload struct {
-		Properties []map[string]any `json:"properties"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
@@ -220,7 +228,7 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 
 	expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
 
-	for _, prop := range payload.Properties {
+	for _, prop := range payload.Items {
 		// Check for slug field first (if present in API response)
 		var propSlug string
 		if s, ok := prop["slug"].(string); ok && s == slug {
@@ -452,7 +460,7 @@ func (c *Client) GetAvailability(propertyID int, year int, month int) ([]Availab
 	}
 
 	var payload struct {
-		Properties []map[string]any `json:"properties"`
+		Items []map[string]any `json:"items"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
 		return nil, err
@@ -460,7 +468,7 @@ func (c *Client) GetAvailability(propertyID int, year int, month int) ([]Availab
 
 	// Build a map of blocked dates from bookings
 	blockedDates := make(map[string]string) // date -> reason
-	for _, item := range payload.Properties {
+	for _, item := range payload.Items {
 		status, _ := item["status"].(string)
 		if status != "active" && status != "pending" {
 			continue
