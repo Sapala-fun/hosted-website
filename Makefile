@@ -65,6 +65,7 @@ lint-frontend: ## Lint frontend code (ESLint/Prettier)
 
 clean: ## Remove build outputs and binaries
 	@rm -rf frontend/dist frontend/.astro frontend/src/styles/theme.css bin/ backend/coverage.out
+	@rm -rf backend/ownerrez-proxy-go backend/server
 	@echo "Cleaned build artifacts"
 
 clean-all: ## Remove all generated files including dependencies

@@ -16,6 +16,10 @@ backend/coverage.out
 # local scripts
 backend/run-go.sh
 
+# Backend proxy and server binaries
+backend/ownerrez-proxy-go/
+backend/server/
+
 # Binaries
 bin/
 *.exe
