@@ -27,52 +27,51 @@ try {
   }
   // If we still have no properties, use hardcoded fallback
   if (properties.length === 0) {
-  // Fallback to hardcoded data if API is unavailable
     properties = [
-    {
-      id: 'orp5b5eae5x',
-      slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
-      name: 'Sapala All',
-      description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
-      bedrooms: 5,
-      bathrooms: 5,
-      sleeps: '11-13',
-      nightlyRateMin: 329,
-      nightlyRateMax: 998,
-      imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
-    },
-    {
-      id: 'orp5b5e872x',
-      slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
-      name: 'Sapala 1',
-      description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
-      bedrooms: 4,
-      bathrooms: 4,
-      sleeps: '8-10',
-      nightlyRateMin: 269,
-      nightlyRateMax: 398,
-      imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
-    },
-    {
-      id: 'orp5b5e89fx',
-      slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
-      name: 'Sapala 2',
-      description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
-      bedrooms: 1,
-      bathrooms: 1,
-      sleeps: '2',
-      nightlyRateMin: 119,
-      nightlyRateMax: 198,
-      imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
-    },
-   ];
+      {
+        id: 'orp5b5eae5x',
+        slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x',
+        name: 'Sapala All',
+        description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
+        bedrooms: 5,
+        bathrooms: 5,
+        sleeps: '11-13',
+        nightlyRateMin: 329,
+        nightlyRateMax: 998,
+        imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      },
+      {
+        id: 'orp5b5e872x',
+        slug: 'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x',
+        name: 'Sapala 1',
+        description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
+        bedrooms: 4,
+        bathrooms: 4,
+        sleeps: '8-10',
+        nightlyRateMin: 269,
+        nightlyRateMax: 398,
+        imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+      },
+      {
+        id: 'orp5b5e89fx',
+        slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx',
+        name: 'Sapala 2',
+        description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
+        bedrooms: 1,
+        bathrooms: 1,
+        sleeps: '2',
+        nightlyRateMin: 119,
+        nightlyRateMax: 198,
+        imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+      },
+    ];
   }
 } catch (error) {
   // Use hardcoded fallback if fetch fails entirely
   properties = [
     {
       id: 'orp5b5eae5x',
-      slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
+      slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x',
       name: 'Sapala All',
       description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
       bedrooms: 5,
@@ -84,7 +83,7 @@ try {
     },
     {
       id: 'orp5b5e872x',
-      slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
+      slug: 'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x',
       name: 'Sapala 1',
       description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
       bedrooms: 4,
@@ -96,7 +95,7 @@ try {
     },
     {
       id: 'orp5b5e89fx',
-      slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
+      slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx',
       name: 'Sapala 2',
       description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
       bedrooms: 1,
@@ -109,21 +108,15 @@ try {
   ];
 }
 
-function getSlugFromPublicUrl(publicUrl: string): string {
-  // Extract slug from public_url like "https://www.sapala.fun/sapala-all-exclusive-orp5b5eae5x"
-  const parts = publicUrl.split('/').filter(Boolean);
-  const lastPart = parts.pop() || '';
-  // Remove the ID suffix (-orp followed by alphanumeric)
-  const slugWithoutId = lastPart.replace(/-orp[0-9a-z]+$/, '');
-  return slugWithoutId;
-}
-
 function getPropertySlug(p: any): string {
-  // Prefer explicit slug if available and non-empty
-  if (p.slug && p.slug.trim() !== '') return p.slug;
-  // Otherwise extract from public_url
-  if (p.public_url) return getSlugFromPublicUrl(p.public_url);
-  // Fallback to id (not ideal but better than empty)
+  // The fallback data already has the full slug with ID suffix
+  const slug = p.slug?.trim() || '';
+  if (slug && p.id) {
+    // Return slug as-is (it should include the ID suffix)
+    return slug;
+  }
+  
+  // Fallback to just id
   return p.id?.toString().trim() || '';
 }
 
