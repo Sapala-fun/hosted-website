@@ -31,6 +31,9 @@ build-frontend: ## Build the Astro static site
 test-backend: ## Run backend unit tests
 	@cd backend && go test ./...
 
+test-backend-api: ## Run backend API connection tests (validates .env credentials)
+	@cd backend && go test -v ./internal/ownerrez
+
 test-backend-cover: ## Run backend tests with coverage report
 	@cd backend && go test -coverprofile=coverage.out ./...
 	@cd backend && go tool cover -func=coverage.out

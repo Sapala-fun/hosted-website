@@ -109,6 +109,24 @@ try {
   ];
 }
 
+function getSlugFromPublicUrl(publicUrl: string): string {
+  // Extract slug from public_url like "https://www.sapala.fun/sapala-all-exclusive-orp5b5eae5x"
+  const parts = publicUrl.split('/').filter(Boolean);
+  const lastPart = parts.pop() || '';
+  // Remove the ID suffix (-orp followed by alphanumeric)
+  const slugWithoutId = lastPart.replace(/-orp[0-9a-z]+$/, '');
+  return slugWithoutId;
+}
+
+function getPropertySlug(p: any): string {
+  // Prefer explicit slug if available and non-empty
+  if (p.slug && p.slug.trim() !== '') return p.slug;
+  // Otherwise extract from public_url
+  if (p.public_url) return getSlugFromPublicUrl(p.public_url);
+  // Fallback to id (not ideal but better than empty)
+  return p.id?.toString().trim() || '';
+}
+
 const heroSlides = [
   'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
   'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
@@ -165,8 +183,7 @@ const features = [
     </div>
     <div class="property-grid">
       {properties.map((prop) => (
-        <!-- Use slug if available (URL-friendly), otherwise fall back to id -->
-        <a href={`/${prop.slug || prop.id}`} class="property-card">
+        <a href={`/${getPropertySlug(prop)}`} class="property-card">
           <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
             <span class="property-card-badge">{prop.bedrooms} BR</span>
           </div>

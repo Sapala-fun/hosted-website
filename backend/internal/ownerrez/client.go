@@ -202,6 +202,7 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 		return nil, fmt.Errorf("ownerrez credentials not configured")
 	}
 
+	// First, get the list of properties to find the property ID
 	req, err := http.NewRequest(http.MethodGet, c.BaseURL+"/v2/properties", nil)
 	if err != nil {
 		return nil, err
@@ -209,207 +210,268 @@ func (c *Client) GetPropertyDetails(slug string) (*PropertyDetails, error) {
 	req.Header.Set("Authorization", c.authHeader())
 	req.Header.Set("Content-Type", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	respList, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer respList.Body.Close()
 
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("ownerrez properties request failed: %s", resp.Status)
+	if respList.StatusCode >= 400 {
+		return nil, fmt.Errorf("ownerrez properties request failed: %s", respList.Status)
 	}
 
 	var payload struct {
 		Items []map[string]any `json:"items"`
 	}
-	if err := json.NewDecoder(resp.Body).Decode(&payload); err != nil {
+	if err := json.NewDecoder(respList.Body).Decode(&payload); err != nil {
 		return nil, err
 	}
 
 	expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
 
+	// Find the property by matching the public_url
+	var propID int
+	var propSlug string
 	for _, prop := range payload.Items {
-		// Check for slug field first (if present in API response)
-		var propSlug string
 		if s, ok := prop["slug"].(string); ok && s == slug {
 			propSlug = s
-		} else if pubUrl, ok := prop["public_url"].(string); ok {
-			// Fallback: check public_url for slug match (OwnerRez API doesn't return explicit slug)
-			// The URL format is: https://www.sapala.fun/slug-orpsomething
+			propID, _ = prop["id"].(int)
+			break
+		}
+		if pubUrl, ok := prop["public_url"].(string); ok {
+			// Direct exact match (slug might already include the -or suffix)
+			if pubUrl == expectedUrl {
+				propSlug = slug
+				// Try to get ID as float64 first (JSON numbers often decode as float64)
+				idVal := prop["id"]
+				switch v := idVal.(type) {
+				case int:
+					propID = v
+				case float64:
+					propID = int(v)
+				case string:
+					// Try to parse as int
+					fmt.Sscanf(v, "%d", &propID)
+				}
+				break
+			}
+			// Prefix match: expectedUrl is a prefix of pubUrl
 			if len(pubUrl) > len(expectedUrl) && pubUrl[:len(expectedUrl)] == expectedUrl {
 				propSlug = slug
-			} else if idx := strings.Index(pubUrl, "-or"); idx > 0 && idx+len("-or") < len(pubUrl) {
-				// Extract slug from URL (format: https://www.sapala.fun/slug-orpsomething)
+				propID, _ = prop["id"].(int)
+				break
+			}
+			// Fallback: match up to the -or in public_url
+			if idx := strings.Index(pubUrl, "-or"); idx > 3 && idx+len("-or") < len(pubUrl) {
 				if prefix := pubUrl[:idx]; prefix == expectedUrl {
 					propSlug = slug
+					propID, _ = prop["id"].(int)
+					break
+				}
+			} else if idx := strings.Index(pubUrl, "-or"); idx > 3 && idx+len("-or") == len(pubUrl) {
+				if prefix := pubUrl[:idx]; prefix == expectedUrl {
+					propSlug = slug
+					propID, _ = prop["id"].(int)
+					break
 				}
 			}
 		}
-
-		if propSlug == "" {
-			continue
-		}
-
-		// Extract photos from images array if available
-		var photos []string
-		if imgs, ok := prop["images"].([]any); ok {
-			for _, img := range imgs {
-				if imgStr, ok := img.(string); ok {
-					photos = append(photos, imgStr)
-				}
-			}
-		} else if img, ok := prop["image_url"].(string); ok && img != "" {
-			photos = append(photos, img)
-		}
-
-		// Extract amenities from property data
-		var amenities []map[string]string
-		if amens, ok := prop["amenities"].([]any); ok {
-			for _, a := range amens {
-				if amMap, ok := a.(map[string]any); ok {
-					amStr := make(map[string]string)
-					for k, v := range amMap {
-						amStr[k] = fmt.Sprintf("%v", v)
-					}
-					amenities = append(amenities, amStr)
-				}
-			}
-		}
-
-		// Get nightly rates
-		nightlyRateMin := 0.0
-		nightlyRateMax := 0.0
-		if nr, ok := prop["nightly_rate_min"].(float64); ok {
-			nightlyRateMin = nr
-		} else if nr, ok := prop["nightlyRate"].(float64); ok {
-			nightlyRateMin = nr
-		}
-		if nrMax, ok := prop["nightly_rate_max"].(float64); ok {
-			nightlyRateMax = nrMax
-		}
-
-		// Get sleeps as string
-		sleeps := ""
-		if s, ok := prop["sleeps"].(string); ok {
-			sleeps = s
-		} else if s, ok := prop["sleeps"].(float64); ok {
-			sleeps = fmt.Sprintf("%d", int(s))
-		}
-
-		// Get bedrooms/bathrooms as ints
-		bedrooms := 0
-		if b, ok := prop["bedrooms"].(float64); ok {
-			bedrooms = int(b)
-		}
-		bathrooms := 0
-		if b, ok := prop["bathrooms"].(float64); ok {
-			bathrooms = int(b)
-		}
-
-		// Get cancellation policy if available
-		cancellationPolicy := ""
-		if cp, ok := prop["cancellation_policy"].(string); ok {
-			cancellationPolicy = cp
-		} else if cpMap, ok := prop["cancellationPolicy"].(map[string]any); ok {
-			if desc, ok := cpMap["description"].(string); ok {
-				cancellationPolicy = desc
-			}
-		}
-
-		// Get owner info if available
-		ownerName := ""
-		if owner, ok := prop["owner"].(map[string]any); ok {
-			if name, ok := owner["name"].(string); ok {
-				ownerName = name
-			}
-		} else if name, ok := prop["owner_name"].(string); ok {
-			ownerName = name
-		}
-		ownerBio := ""
-		if bio, ok := prop["owner_bio"].(string); ok {
-			ownerBio = bio
-		} else if owner, ok := prop["owner"].(map[string]any); ok {
-			if bio, ok := owner["bio"].(string); ok {
-				ownerBio = bio
-			}
-		}
-
-		// Get location if available
-		location := "Christiansted, St. Croix, USVI, Virgin Islands (U.S.)"
-		if loc, ok := prop["location"].(string); ok {
-			location = loc
-		} else if addr, ok := prop["address"].(map[string]any); ok {
-			var parts []string
-			if city, ok := addr["city"].(string); ok {
-				parts = append(parts, city)
-			}
-			if region, ok := addr["region"].(string); ok {
-				parts = append(parts, region)
-			}
-			if country, ok := addr["country"].(string); ok {
-				parts = append(parts, country)
-			}
-			if len(parts) > 0 {
-				location = parts[0]
-				for i := 1; i < len(parts); i++ {
-					location += ", " + parts[i]
-				}
-			}
-		}
-
-		// Get booking URL if available
-		bookingURL := ""
-		if bu, ok := prop["booking_url"].(string); ok {
-			bookingURL = bu
-		} else if bu, ok := prop["bookOnlineUrl"].(string); ok {
-			bookingURL = bu
-		}
-
-		// Get guest reviews if available
-		var guestReviews []map[string]string
-		if reviews, ok := prop["reviews"].([]any); ok {
-			for _, r := range reviews {
-				if revMap, ok := r.(map[string]any); ok {
-					revStr := make(map[string]string)
-					for k, v := range revMap {
-						revStr[k] = fmt.Sprintf("%v", v)
-					}
-					guestReviews = append(guestReviews, revStr)
-				}
-			}
-		}
-
-		// Get image URL for hero
-		imageUrl := ""
-		if img, ok := prop["image_url"].(string); ok {
-			imageUrl = img
-		} else if len(photos) > 0 {
-			imageUrl = photos[0]
-		}
-
-		return &PropertyDetails{
-			ID:                 fmt.Sprintf("%v", prop["id"]),
-			Slug:               propSlug,
-			Name:               getString(prop, "name"),
-			Description:        getString(prop, "description"),
-			Bedrooms:           bedrooms,
-			Bathrooms:          bathrooms,
-			Sleeps:             sleeps,
-			NightlyRateMin:     nightlyRateMin,
-			NightlyRateMax:     nightlyRateMax,
-			ImageUrl:           imageUrl,
-			Photos:             photos,
-			Amenities:          amenities,
-			CancellationPolicy: cancellationPolicy,
-			OwnerName:          ownerName,
-			OwnerBio:           ownerBio,
-			Location:           location,
-			BookingURL:         bookingURL,
-			GuestReviews:       guestReviews,
-		}, nil
 	}
 
-	return nil, fmt.Errorf("property not found: %s", slug)
+	if propID == 0 || propSlug == "" {
+		return nil, fmt.Errorf("property not found: %s (matched propID=%d, propSlug='%s')", slug, propID, propSlug)
+	}
+
+	// Now fetch the full property details using /v2/properties/{id}
+	detailReq, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/v2/properties/%d", c.BaseURL, propID), nil)
+	if err != nil {
+		return nil, err
+	}
+	detailReq.Header.Set("Authorization", c.authHeader())
+	detailReq.Header.Set("Content-Type", "application/json")
+
+	respDetail, err := http.DefaultClient.Do(detailReq)
+	if err != nil {
+		return nil, err
+	}
+	defer respDetail.Body.Close()
+
+	if respDetail.StatusCode >= 400 {
+		return nil, fmt.Errorf("ownerrez property details request failed: %s", respDetail.Status)
+	}
+
+	var prop map[string]any
+	if err := json.NewDecoder(respDetail.Body).Decode(&prop); err != nil {
+		return nil, err
+	}
+
+	// Extract photos from images array if available
+	var photos []string
+	if imgs, ok := prop["images"].([]any); ok {
+		for _, img := range imgs {
+			if imgStr, ok := img.(string); ok {
+				photos = append(photos, imgStr)
+			}
+		}
+	} else if img, ok := prop["image_url"].(string); ok && img != "" {
+		photos = append(photos, img)
+	}
+
+	// Extract amenities from property data
+	var amenities []map[string]string
+	if amens, ok := prop["amenities"].([]any); ok {
+		for _, a := range amens {
+			if amMap, ok := a.(map[string]any); ok {
+				amStr := make(map[string]string)
+				for k, v := range amMap {
+					amStr[k] = fmt.Sprintf("%v", v)
+				}
+				amenities = append(amenities, amStr)
+			}
+		}
+	}
+
+	// Get nightly rates
+	nightlyRateMin := 0.0
+	nightlyRateMax := 0.0
+	if nr, ok := prop["nightly_rate_min"].(float64); ok {
+		nightlyRateMin = nr
+	} else if nr, ok := prop["nightlyRate"].(float64); ok {
+		nightlyRateMin = nr
+	}
+	if nrMax, ok := prop["nightly_rate_max"].(float64); ok {
+		nightlyRateMax = nrMax
+	}
+
+	// Get sleeps as string
+	sleeps := ""
+	if s, ok := prop["sleeps"].(string); ok {
+		sleeps = s
+	} else if s, ok := prop["sleeps"].(float64); ok {
+		sleeps = fmt.Sprintf("%d", int(s))
+	}
+
+	// Get bedrooms/bathrooms as ints
+	bedrooms := 0
+	if b, ok := prop["bedrooms"].(float64); ok {
+		bedrooms = int(b)
+	}
+	bathrooms := 0
+	if b, ok := prop["bathrooms"].(float64); ok {
+		bathrooms = int(b)
+	}
+
+	// Get cancellation policy if available
+	cancellationPolicy := ""
+	if cp, ok := prop["cancellation_policy"].(string); ok {
+		cancellationPolicy = cp
+	} else if cpMap, ok := prop["cancellationPolicy"].(map[string]any); ok {
+		if desc, ok := cpMap["description"].(string); ok {
+			cancellationPolicy = desc
+		}
+	}
+
+	// Get owner info if available
+	ownerName := ""
+	if owner, ok := prop["owner"].(map[string]any); ok {
+		if name, ok := owner["name"].(string); ok {
+			ownerName = name
+		}
+	} else if name, ok := prop["owner_name"].(string); ok {
+		ownerName = name
+	}
+	ownerBio := ""
+	if bio, ok := prop["owner_bio"].(string); ok {
+		ownerBio = bio
+	} else if owner, ok := prop["owner"].(map[string]any); ok {
+		if bio, ok := owner["bio"].(string); ok {
+			ownerBio = bio
+		}
+	}
+
+	// Get location if available
+	location := "Christiansted, St. Croix, USVI, Virgin Islands (U.S.)"
+	if loc, ok := prop["location"].(string); ok {
+		location = loc
+	} else if addr, ok := prop["address"].(map[string]any); ok {
+		var parts []string
+		if city, ok := addr["city"].(string); ok {
+			parts = append(parts, city)
+		}
+		if region, ok := addr["region"].(string); ok {
+			parts = append(parts, region)
+		}
+		if country, ok := addr["country"].(string); ok {
+			parts = append(parts, country)
+		}
+		if len(parts) > 0 {
+			location = parts[0]
+			for i := 1; i < len(parts); i++ {
+				location += ", " + parts[i]
+			}
+		}
+	}
+
+	// Get booking URL if available
+	bookingURL := ""
+	if bu, ok := prop["booking_url"].(string); ok {
+		bookingURL = bu
+	} else if bu, ok := prop["bookOnlineUrl"].(string); ok {
+		bookingURL = bu
+	}
+
+	// Get guest reviews if available
+	var guestReviews []map[string]string
+	if reviews, ok := prop["reviews"].([]any); ok {
+		for _, r := range reviews {
+			if revMap, ok := r.(map[string]any); ok {
+				revStr := make(map[string]string)
+				for k, v := range revMap {
+					revStr[k] = fmt.Sprintf("%v", v)
+				}
+				guestReviews = append(guestReviews, revStr)
+			}
+		}
+	}
+
+	// Get image URL for hero
+	imageUrl := ""
+	if img, ok := prop["image_url"].(string); ok {
+		imageUrl = img
+	} else if len(photos) > 0 {
+		imageUrl = photos[0]
+	}
+
+	// Try multiple possible description field names
+	description := ""
+	descFields := []string{"description", "description_html", "long_description", "Overview"}
+	for _, field := range descFields {
+		if d, ok := prop[field].(string); ok && d != "" {
+			description = d
+			break
+		}
+	}
+
+	return &PropertyDetails{
+		ID:                 fmt.Sprintf("%d", propID),
+		Slug:               propSlug,
+		Name:               getString(prop, "name"),
+		Description:        description,
+		Bedrooms:           bedrooms,
+		Bathrooms:          bathrooms,
+		Sleeps:             sleeps,
+		NightlyRateMin:     nightlyRateMin,
+		NightlyRateMax:     nightlyRateMax,
+		ImageUrl:           imageUrl,
+		Photos:             photos,
+		Amenities:          amenities,
+		CancellationPolicy: cancellationPolicy,
+		OwnerName:          ownerName,
+		OwnerBio:           ownerBio,
+		Location:           location,
+		BookingURL:         bookingURL,
+		GuestReviews:       guestReviews,
+	}, nil
 }
 
 func getString(m map[string]any, key string) string {
