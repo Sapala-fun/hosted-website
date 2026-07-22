@@ -83,6 +83,41 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 		return nil, err
 	}
 
+	// Normalize property data - convert image_url to imageUrl for frontend compatibility
+	for i := range payload.Items {
+		prop := &payload.Items[i]
+
+		// Handle various possible image field names from OwnerRez API
+		var imageUrl string
+		if img, ok := (*prop)["image_url"].(string); ok && img != "" {
+			imageUrl = img
+		} else if img, ok := (*prop)["imageUrl"].(string); ok && img != "" {
+			imageUrl = img
+		} else if img, ok := (*prop)["hero_image"].(string); ok && img != "" {
+			imageUrl = img
+		}
+
+		if imageUrl != "" {
+			(*prop)["imageUrl"] = imageUrl
+		}
+
+		// Also normalize nightlyRate fields
+		if rate, ok := (*prop)["nightly_rate"].(float64); ok {
+			(*prop)["nightlyRate"] = rate
+		}
+		if rateMin, ok := (*prop)["nightly_rate_min"].(float64); ok {
+			(*prop)["nightlyRateMin"] = rateMin
+		}
+		if rateMax, ok := (*prop)["nightly_rate_max"].(float64); ok {
+			(*prop)["nightlyRateMax"] = rateMax
+		}
+
+		// Convert id from float64 to int-like format for consistency
+		if id, ok := (*prop)["id"].(float64); ok {
+			(*prop)["id"] = int(id)
+		}
+	}
+
 	return payload.Items, nil
 }
 
