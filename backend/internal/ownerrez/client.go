@@ -95,6 +95,14 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 			imageUrl = img
 		} else if img, ok := (*prop)["hero_image"].(string); ok && img != "" {
 			imageUrl = img
+		} else if imgs, ok := (*prop)["images"].([]any); ok && len(imgs) > 0 {
+			if imgStr, ok := imgs[0].(string); ok {
+				imageUrl = imgStr
+			}
+		} else if imgs, ok := (*prop)["photos"].([]any); ok && len(imgs) > 0 {
+			if imgStr, ok := imgs[0].(string); ok {
+				imageUrl = imgStr
+			}
 		}
 
 		if imageUrl != "" {

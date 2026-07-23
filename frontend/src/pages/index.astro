@@ -5,6 +5,13 @@ import { apiBaseUrl } from '../config/site';
 
   // Fetch properties from OwnerRez API at build time with fallback
 let properties: Property[] = [];
+
+const fallbackImages: Record<string, string> = {
+  'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x': 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+  'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x': 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+  'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx': 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+};
+
 try {
   const res = await fetch(`${apiBaseUrl}/api/properties`, { signal: AbortSignal.timeout(5000) });
   if (res.ok) {
@@ -21,7 +28,7 @@ try {
         sleeps: String(p.sleeps || ''),
         nightlyRateMin: p.nightlyRateMin || p.nightlyRate || 0,
         nightlyRateMax: p.nightlyRateMax || 0,
-        imageUrl: p.imageUrl || '',
+        imageUrl: p.imageUrl || fallbackImages[p.slug] || '',
       }));
     }
   }
