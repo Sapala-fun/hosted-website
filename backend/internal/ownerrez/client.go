@@ -116,6 +116,18 @@ func (c *Client) GetProperties() ([]map[string]any, error) {
 		if id, ok := (*prop)["id"].(float64); ok {
 			(*prop)["id"] = int(id)
 		}
+
+		// Extract slug from public_url (format: https://www.sapala.fun/{slug})
+		if pubUrl, ok := (*prop)["public_url"].(string); ok && pubUrl != "" {
+			// Get the path part of URL
+			path := strings.TrimPrefix(strings.TrimPrefix(pubUrl, "https://"), "http://")
+			if idx := strings.Index(path, "/"); idx > 0 {
+				path = path[idx+1:]
+			}
+			if path != "" && path != pubUrl {
+				(*prop)["slug"] = path
+			}
+		}
 	}
 
 	return payload.Items, nil
@@ -151,14 +163,35 @@ func (c *Client) GetProperty(slug string) (map[string]any, error) {
 	}
 
 	for _, prop := range payload.Items {
+		// Normalize the property data (same as GetProperties)
+		// Extract slug from public_url if not already present
+		if s, ok := prop["slug"].(string); !ok || s == "" {
+			if pubUrl, ok := prop["public_url"].(string); ok && pubUrl != "" {
+				path := strings.TrimPrefix(strings.TrimPrefix(pubUrl, "https://"), "http://")
+				if idx := strings.Index(path, "/"); idx > 0 {
+					path = path[idx+1:]
+				}
+				if path != "" && path != pubUrl {
+					prop["slug"] = path
+				}
+			}
+		}
+
 		// Check for slug field first (if present in API response)
-		if s, ok := prop["slug"].(string); ok && s == slug {
+		var propSlug string
+		if s, ok := prop["slug"].(string); ok {
+			propSlug = s
+		} else if s, ok := prop["slug"].(float64); ok {
+			propSlug = fmt.Sprintf("%d", int(s))
+		}
+
+		if propSlug == slug {
 			return prop, nil
 		}
 		// Fallback: check public_url for slug match (OwnerRez API doesn't return explicit slug)
 		expectedUrl := fmt.Sprintf("https://www.sapala.fun/%s", slug)
-		if s, ok := prop["public_url"].(string); ok {
-			if len(s) > len(expectedUrl) && s[:len(expectedUrl)] == expectedUrl {
+		if pubUrl, ok := prop["public_url"].(string); ok {
+			if len(pubUrl) > len(expectedUrl) && pubUrl[:len(expectedUrl)] == expectedUrl {
 				return prop, nil
 			}
 		}

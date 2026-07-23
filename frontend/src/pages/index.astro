@@ -109,14 +109,14 @@ try {
 }
 
 function getPropertySlug(p: any): string {
-  // The fallback data already has the full slug with ID suffix
-  const slug = p.slug?.trim() || '';
-  if (slug && p.id) {
+  // Check if slug exists and is non-empty
+  const slug = p.slug?.trim();
+  if (slug) {
     // Return slug as-is (it should include the ID suffix)
     return slug;
   }
   
-  // Fallback to just id
+  // Fallback to just id if slug is empty/missing
   return p.id?.toString().trim() || '';
 }
 
