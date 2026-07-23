@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/example/ownerrez-github-pages/internal/ownerrez"
 	"github.com/gin-gonic/gin"
@@ -185,6 +186,8 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 	c.Header("Content-Type", "application/json")
 	slug := c.Param("slug")
 
+	log.Printf("availabilityHandler - slug from URL: %q", slug)
+
 	yearStr := c.Query("year")
 	monthStr := c.Query("month")
 
@@ -205,6 +208,18 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 
 	// First, find the property ID from slug
 	properties, err := client.GetProperties()
+
+	// Debug: log properties to understand slug matching issue
+	log.Printf("availabilityHandler - got %d properties", len(properties))
+	if err != nil {
+		log.Printf("  Error getting properties: %v", err)
+	} else {
+		for i, prop := range properties {
+			propSlug, ok := prop["slug"].(string)
+			log.Printf("  Property %d: id=%v, name=%v, public_url=%v, slug_raw=%q, slug_ok=%v",
+				i, prop["id"], prop["name"], prop["public_url"], propSlug, ok)
+		}
+	}
 	if err != nil {
 		c.JSON(200, gin.H{
 			"dates":   []ownerrez.AvailabilityDate{},
@@ -218,14 +233,30 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 
 	var propertyID int
 	var nightlyRate float64
+	log.Printf("availabilityHandler - looking for slug: %q", slug)
 	for _, prop := range properties {
 		// Check for slug field first (if present in API response)
 		if s, ok := prop["slug"].(string); ok && s == slug {
-			if id, ok := prop["id"].(float64); ok {
-				propertyID = int(id)
+			log.Printf("  MATCHED by slug! id=%v, type(id)=%T, slug=%q", prop["id"], prop["id"], s)
+			idVal := prop["id"]
+			switch v := idVal.(type) {
+			case float64:
+				propertyID = int(v)
+				log.Printf("    propertyID set to %d from float64", propertyID)
+			case string:
+				propertyID, _ = strconv.Atoi(v)
+				log.Printf("    propertyID set to %d from string", propertyID)
+			case int:
+				propertyID = v
+				log.Printf("    propertyID set to %d from int", propertyID)
+			default:
+				log.Printf("    WARNING: couldn't convert id to int (type=%T)", v)
 			}
 			if nr, ok := prop["nightlyRate"].(float64); ok {
 				nightlyRate = nr
+				log.Printf("    nightlyRate set to %.2f", nightlyRate)
+			} else {
+				log.Printf("    WARNING: couldn't get nightlyRate")
 			}
 			break
 		}
