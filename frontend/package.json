@@ -11,7 +11,7 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.16.0"
+    "astro": "astrojs/astro"
   },
   "devDependencies": {
     "@vitest/browser": "^4.1.10",
