@@ -1,5 +1,6 @@
 ---
 import Layout from '../components/Layout.astro';
+import { apiBaseUrl } from '../config/site';
 
 export async function getStaticPaths() {
   return [
@@ -30,6 +31,15 @@ interface PropertyDetails {
   location: string;
   bookingUrl: string;
   guestReviews: Array<{ comment: string; author: string }>;
+}
+
+// Helper to get absolute API URL (works in both SSR and client)
+function getApiUrl(path: string): string {
+  // If PUBLIC_API_BASE_URL is set, use it; otherwise default to localhost
+  const base = apiBaseUrl;
+  const fullUrl = `${base}${path}`;
+  console.log('[getApiUrl]', 'SSR:', import.meta.env.SSR, 'base:', JSON.stringify(base), 'path:', path, 'full:', fullUrl);
+  return fullUrl;
 }
 
 // Fallback data for all properties (used during build or if API fails)
@@ -148,18 +158,18 @@ Another four bedroom unit above this apt is rented separately.`,
 const fallbackPropertyData = fallbackDetails[slug] || fallbackDetails['sapala-all-exclusive-oceanfront-villa-with-private-pool'];
 
 async function getPropertyDetails(slug: string): Promise<PropertyDetails> {
-  // Check if we're in build mode and backend isn't available
-  // In this case, use fallback data directly
-  const useFallback = import.meta.env.SSR && !import.meta.env.DEV;
-  
-  if (useFallback) {
+  console.log('[getPropertyDetails] SSR:', import.meta.env.SSR, 'slug:', slug, 'apiBaseUrl:', JSON.stringify(apiBaseUrl));
+  // Always use fallback data during SSR (including dev SSR)
+  if (import.meta.env.SSR) {
+    console.log('[getPropertyDetails] Using SSR fallback');
     return fallbackPropertyData;
   }
   
   try {
-    // Use the environment variable for API URL - available in both SSR and client
-    const serverApiUrl = 'http://localhost:3001';
-    const res = await fetch(`${serverApiUrl}/api/property/${slug}/details`, { 
+    const apiUrl = getApiUrl(`/api/property/${slug}/details`);
+    console.log('[getPropertyDetails] Fetching from:', apiUrl);
+    // Use absolute URL for client-side fetch
+    const res = await fetch(apiUrl, { 
       signal: AbortSignal.timeout(10000) 
     });
     if (res.ok) {
@@ -305,7 +315,7 @@ const propertyDetails = await getPropertyDetails(slug);
 
       <!-- Availability Calendar Section -->
       <h2 id="availability" style="margin-top:3rem;">Availability Calendar</h2>
-      <div class="availability-calendar" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:2rem;">
+      <div id="availabilityCalendar" data-slug={slug} data-api-base={apiBaseUrl} class="availability-calendar" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:2rem;">
         <div class="calendar-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
           <h3 id="calendarMonthYear" style="margin:0; font-size:1.2rem;">Loading...</h3>
           <div style="display:flex; gap:0.5rem;">
@@ -383,10 +393,12 @@ const propertyDetails = await getPropertyDetails(slug);
       });
     });
 
-     // Availability calendar logic
-    const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      // Availability calendar logic
     let currentYear = new Date().getFullYear();
     let currentMonth = new Date().getMonth() + 1; // 1-indexed (1-12)
+    const calendarEl = document.getElementById('availabilityCalendar');
+    const propertySlug = calendarEl?.dataset.slug || '';
+    const apiBase = calendarEl?.dataset.apiBase || '';
     
     async function loadAvailability(year, month) {
       const calendarGrid = document.getElementById('calendarGrid');
@@ -394,8 +406,8 @@ const propertyDetails = await getPropertyDetails(slug);
       
       if (!calendarGrid || !calendarMonthYear) return;
       
-      try {
-        const res = await fetch(`${apiBaseUrl}/api/availability/${slug}?year=${year}&month=${month}`);
+       try {
+         const res = await fetch(`${apiBase}/api/availability/${propertySlug}?year=${year}&month=${month}`);
         if (res.ok) {
           const data = await res.json();
           calendarMonthYear.textContent = new Date(year, month - 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });

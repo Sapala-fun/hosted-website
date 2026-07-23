@@ -10,4 +10,7 @@ export const site = {
   },
 } as const;
 
-export const apiBaseUrl = import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:3001';
+// Debug: log the env value at build/load time
+console.log('[site.ts] PUBLIC_API_BASE_URL:', JSON.stringify(import.meta.env.PUBLIC_API_BASE_URL));
+const apiBaseUrlValue = import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:3001';
+export const apiBaseUrl = apiBaseUrlValue;
