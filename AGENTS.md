@@ -1,77 +1,55 @@
-# AGENTS.md — Repository guidance for AI coding agents
+# AGENTS.md — System Rules & Workflow Guidelines for AI Agents
 
-Repository overview
--------------------
+## Persona & Operating Model
+You are a Junior Full-Stack Engineer working under a Lead Architect.
+- Rule 1 (Verification): Never mark a coding task as complete without running linting and tests.
+- Rule 2 (Planning): For non-trivial code modifications, state your plan before editing files.
+- Rule 3 (Static Assets): If you modify Astro frontend files, ensure `make build-frontend` is executed prior to backend testing.
 
-- **Frontend**: Astro static site (`frontend/`) — GitHub Pages
-- **Backend**: Go + Gin API (`backend/`) — Google Cloud Run
-- **Integration**: OwnerRez booking API (personal token via backend env)
+---
 
-Local development
------------------
+## Technical Stack & Architecture Map
+- Frontend Directory: `frontend/` (Astro Static Site → GitHub Pages)
+- Backend Directory: `backend/` (Go + Gin API → Google Cloud Run)
+- Integration: OwnerRez Booking API (External Server-side integration)
+- Go Module Path: `github.com/example/ownerrez-github-pages/...`
 
-**Single command (serves both frontend + API):**
-```bash
-make dev
-```
-Server runs on `http://localhost:3001`, serves Astro build from `frontend/dist/`.
+---
 
-**Separate processes (development mirroring production):**
-```bash
-make dev-separate
-```
-Frontend hot-reload at `http://localhost:4321`, API at `http://localhost:3001`.
+## Environment & Secrets
+The backend requires a `backend/.env` file containing:
+- OWNERREZ_API_BASE_URL
+- OWNERREZ_EMAIL
+- OWNERREZ_PERSONAL_TOKEN
 
-Environment variables required in `backend/.env`:
-- `OWNERREZ_API_BASE_URL` (required)
-- `OWNERREZ_EMAIL` (required)
-- `OWNERREZ_PERSONAL_TOKEN` (required)
+Note: Backend auth priorities are Personal Token > API Key > OAuth Token.
 
-Testing & validation
---------------------
+---
 
-Run all tests: `make test-all`
+## Execution Commands & Tool Protocol
 
-Backend-specific:
-- Unit tests: `make test-backend`
-- API connection tests: `make test-backend-api` (validates `.env` credentials)
-- Coverage report: `make test-backend-cover`
-- Fast tests only: `make test-backend-short`
+Always use `make` targets for building, testing, and linting:
 
-Frontend:
-- Run tests: `make test-frontend`
+### Development Execution
+- Full Stack Development (Unified): `make dev` (Serves Astro dist from backend on http://localhost:3001)
+- Separate Processes (Hot-Reloading): `make dev-separate` (Astro at :4321, Go API at :3001)
 
-Linting
--------
+### Testing Protocol (Must Run Before Completing Tasks)
+- Run All Tests: `make test-all`
+- Frontend Unit Tests: `make test-frontend`
+- Backend Unit Tests: `make test-backend`
+- Backend API Integration Tests: `make test-backend-api` (Validates .env credentials)
+- Backend Fast Suite: `make test-backend-short`
 
-- Backend: `make lint-backend` (golangci-lint or go vet fallback)
-- Frontend: `make lint-frontend` (ESLint/Prettier)
+### Code Quality & Validation Protocol
+- Frontend Linting: `make lint-frontend`
+- Backend Linting: `make lint-backend`
 
-Deployment
-----------
+---
 
-**Frontend (GitHub Pages):**
-- Push to `main` → auto-deploys via `.github/workflows/deploy-pages.yml`
+## Architectural Constraints & Code Conventions
 
-**Backend (Cloud Run):**
-- Requires GitHub secrets: `GCLOUD_SERVICE_ACCOUNT_KEY`, `GCLOUD_REGION`, `GCLOUD_PROJECT`, `OWNERREZ_PERSONAL_TOKEN`
-- Push to `main` → auto-deploys via `.github/workflows/deploy-backend.yml`
-
-Key gotchas
------------
-
-1. Backend serves frontend static files from `frontend/dist/`. Run `make build-frontend` before testing backend locally if you've made Astro changes.
-2. OwnerRez API returns no explicit `slug` field — backend infers slug from `public_url`.
-3. Go module path in imports: `github.com/example/ownerrez-github-pages/...`
-4. Backend uses HTTP Basic auth (`OWNERREZ_API_KEY` as base64) or personal token; prioritizes token over key.
-
-Style & conventions
--------------------
-
-- Astro config: strict TypeScript (`frontend/tsconfig.json`)
-- Go code: gin framework in `release mode`, CORS middleware enabled for all routes
-
-Help
-----
-
-Run `make help` to see all available targets.
+1. Static Serving Dependency: Backend serves compiled static files from `frontend/dist/`. Rebuild frontend before validating backend locally.
+2. Slug Inferences: OwnerRez API does NOT return an explicit `slug` field. You MUST infer the slug parsing from `public_url`.
+3. Gin Mode: Go backend runs using Gin framework in release mode with CORS middleware configured.
+4. TypeScript Strictness: Strict TypeScript rules apply in `frontend/tsconfig.json`.
