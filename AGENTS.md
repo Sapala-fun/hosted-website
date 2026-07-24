@@ -12,24 +12,40 @@ Local development
 
 **Single command (serves both frontend + API):**
 ```bash
-cd backend && ./run-go.sh  # or: go run .
+make dev
 ```
 Server runs on `http://localhost:3001`, serves Astro build from `frontend/dist/`.
 
 **Separate processes (development mirroring production):**
-- Backend: `cd backend && ./run-go.sh` → port 3001
-- Frontend: `cd frontend && npm run dev` → port 4321 (calls API at :3001)
+```bash
+make dev-separate
+```
+Frontend hot-reload at `http://localhost:4321`, API at `http://localhost:3001`.
 
 Environment variables required in `backend/.env`:
-- `OWNERREZ_API_BASE_URL`
-- `OWNERREZ_EMAIL`
-- `OWNERREZ_PERSONAL_TOKEN`
+- `OWNERREZ_API_BASE_URL` (required)
+- `OWNERREZ_EMAIL` (required)
+- `OWNERREZ_PERSONAL_TOKEN` (required)
 
-Testing
+Testing & validation
+--------------------
+
+Run all tests: `make test-all`
+
+Backend-specific:
+- Unit tests: `make test-backend`
+- API connection tests: `make test-backend-api` (validates `.env` credentials)
+- Coverage report: `make test-backend-cover`
+- Fast tests only: `make test-backend-short`
+
+Frontend:
+- Run tests: `make test-frontend`
+
+Linting
 -------
 
-- Frontend: `cd frontend && npm run test`
-- Backend: `cd backend && go test ./...`
+- Backend: `make lint-backend` (golangci-lint or go vet fallback)
+- Frontend: `make lint-frontend` (ESLint/Prettier)
 
 Deployment
 ----------
@@ -44,7 +60,7 @@ Deployment
 Key gotchas
 -----------
 
-1. Backend serves frontend static files from `frontend/dist/`. Run `cd frontend && npm run build` before testing backend locally if you've made Astro changes.
+1. Backend serves frontend static files from `frontend/dist/`. Run `make build-frontend` before testing backend locally if you've made Astro changes.
 2. OwnerRez API returns no explicit `slug` field — backend infers slug from `public_url`.
 3. Go module path in imports: `github.com/example/ownerrez-github-pages/...`
 4. Backend uses HTTP Basic auth (`OWNERREZ_API_KEY` as base64) or personal token; prioritizes token over key.
@@ -54,3 +70,8 @@ Style & conventions
 
 - Astro config: strict TypeScript (`frontend/tsconfig.json`)
 - Go code: gin framework in `release mode`, CORS middleware enabled for all routes
+
+Help
+----
+
+Run `make help` to see all available targets.
