@@ -1,70 +1,56 @@
 # AGENTS.md — Repository guidance for AI coding agents
 
-Purpose
--------
-
-This file gives concise, actionable guidance for AI coding agents working in this repository. It is intentionally minimal and links to existing docs where appropriate.
-
 Repository overview
 -------------------
 
-- Primary artifact: a hosted static website. See the main README for project details: [hosted-website/README.md](hosted-website/README.md#L1).
+- **Frontend**: Astro static site (`frontend/`) — GitHub Pages
+- **Backend**: Go + Gin API (`backend/`) — Google Cloud Run
+- **Integration**: OwnerRez booking API (personal token via backend env)
 
-Guiding principles for agents
------------------------------
+Local development
+-----------------
 
-- Inspect, don't assume: prefer reading files in the workspace over inferring state.
-- Link, don't duplicate: reference existing docs rather than copying large sections.
-- Small, safe edits: propose large changes before applying them.
+**Single command (serves both frontend + API):**
+```bash
+cd backend && ./run-go.sh  # or: go run .
+```
+Server runs on `http://localhost:3001`, serves Astro build from `frontend/dist/`.
 
-Models: adding or updating ML models ("add models")
--------------------------------------------------
+**Separate processes (development mirroring production):**
+- Backend: `cd backend && ./run-go.sh` → port 3001
+- Frontend: `cd frontend && npm run dev` → port 4321 (calls API at :3001)
 
-When adding models to this repository, follow these conventions so agents and humans can find, validate, and safely reference models.
+Environment variables required in `backend/.env`:
+- `OWNERREZ_API_BASE_URL`
+- `OWNERREZ_EMAIL`
+- `OWNERREZ_PERSONAL_TOKEN`
 
-1. Location
-   - Create a top-level `models/` directory for model artifacts and metadata (do not commit large binary checkpoints directly unless using Git LFS).
-   - Per-model layout: `models/<model-name>/` containing a `card.md`, `metadata.json` (optional), and pointers to large files.
+Testing
+-------
 
-2. Model Card
-   - Every model must include `models/<model-name>/card.md` containing:
-     - Short description, intended use, and limitations.
-     - Training data summary and licenses.
-     - Evaluation metrics and test dataset references.
-     - Responsible disclosure / contact point.
+- Frontend: `cd frontend && npm run test`
+- Backend: `cd backend && go test ./...`
 
-3. Storage and large files
-   - Avoid committing large binary checkpoints to Git. Use external storage (S3, GCS, or model registry) and include small pointer files in the repo (e.g., `models/<model>/checkpoint.pointer` with a URL and checksum).
-   - If Git LFS is used, add an entry to `.gitattributes` and document this in the model card.
+Deployment
+----------
 
-4. Tests and validation
-   - Add smoke tests under `tests/models/test_<model_name>.py` (or the project's primary test framework) that load a tiny sample input and verify the model returns expected shape/type.
-   - CI pipelines should run these smoke tests. If CI is not yet configured, list required steps in `card.md`.
+**Frontend (GitHub Pages):**
+- Push to `main` → auto-deploys via `.github/workflows/deploy-pages.yml`
 
-5. Versioning and updates
-   - Use semantic-style versioning in `metadata.json` (e.g., `{ "version": "1.0.0" }`) and record changelogs in `card.md`.
+**Backend (Cloud Run):**
+- Requires GitHub secrets: `GCLOUD_SERVICE_ACCOUNT_KEY`, `GCLOUD_REGION`, `GCLOUD_PROJECT`, `OWNERREZ_PERSONAL_TOKEN`
+- Push to `main` → auto-deploys via `.github/workflows/deploy-backend.yml`
 
-6. Security & licensing
-   - Record licenses for the model and any datasets used in `card.md`.
-   - Note any export controls or usage restrictions.
+Key gotchas
+-----------
 
-7. PR checklist for model additions
-   - Include model card and pointer files.
-   - Add smoke tests and CI steps (or a clear TODO if CI changes are required).
-   - Ensure no large binaries are present in the PR.
+1. Backend serves frontend static files from `frontend/dist/`. Run `cd frontend && npm run build` before testing backend locally if you've made Astro changes.
+2. OwnerRez API returns no explicit `slug` field — backend infers slug from `public_url`.
+3. Go module path in imports: `github.com/example/ownerrez-github-pages/...`
+4. Backend uses HTTP Basic auth (`OWNERREZ_API_KEY` as base64) or personal token; prioritizes token over key.
 
-How agents should behave
-------------------------
+Style & conventions
+-------------------
 
-- Prefer editing or creating `AGENTS.md` rather than adding long-form guidance elsewhere.
-- When asked to add models, propose the `models/` structure and a minimal `card.md` template before adding content.
-- If a change may introduce large files or secrets, do not commit them — propose external storage alternatives.
-
-Next suggested customizations
-----------------------------
-
-- Add a CI task that validates `models/*/card.md` and runs `tests/models` smoke tests.
-- Create a small `models/README.md` with standard templates and a `card.md` example.
-
-----
-Generated by an agent to help future AI contributors be productive in this repository.
+- Astro config: strict TypeScript (`frontend/tsconfig.json`)
+- Go code: gin framework in `release mode`, CORS middleware enabled for all routes
