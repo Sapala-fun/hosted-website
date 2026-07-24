@@ -1,0 +1,216 @@
+---
+import Layout from '../components/Layout.astro';
+import type { Property } from '../types';
+import { apiBaseUrl } from '../config/site';
+
+let properties: Property[] = [];
+
+try {
+  const res = await fetch(`${apiBaseUrl}/api/properties`, { signal: AbortSignal.timeout(5000) });
+  if (res.ok) {
+    const data = await res.json();
+    if (data.properties && data.properties.length > 0) {
+      properties = data.properties.map((p: any) => ({
+        id: p.id || '',
+        slug: p.slug || '',
+        name: p.name || '',
+        description: p.description || '',
+        bedrooms: p.bedrooms || 0,
+        bathrooms: p.bathrooms || 0,
+        sleeps: String(p.sleeps || ''),
+        nightlyRateMin: p.nightlyRateMin || p.nightlyRate || 0,
+        nightlyRateMax: p.nightlyRateMax || 0,
+        imageUrl: p.imageUrl || '',
+      }));
+    }
+  }
+} catch (error) {
+  properties = [];
+}
+---
+
+<Layout title="Listings" description="Oceanfront Villas in St. Croix, USVI">
+  <section class="section listings-page">
+    <div class="listings-header">
+      <h1>Listings</h1>
+      
+      <div class="search-filters">
+        <label>
+          Guests
+          <select>
+            <option value="">Any Guests</option>
+            {Array.from({ length: 13 }, (_, i) => i + 1).map(guests => (
+              <option value={guests}>{guests}+ Guests</option>
+            ))}
+          </select>
+        </label>
+        
+        <label>
+          Bedrooms
+          <select>
+            <option value="">Any Bedrooms</option>
+            {Array.from({ length: 5 }, (_, i) => i + 1).map(beds => (
+              <option value={beds}>{beds}+ Bedrooms</option>
+            ))}
+          </select>
+        </label>
+        
+        <button class="btn-search">Search</button>
+      </div>
+      
+      <div class="sort-options">
+        <span>Sorted by:</span>
+        <a href="#" class="active">Featured</a>
+        <a href="#">A-Z</a>
+        <a href="#">Number of Bedrooms</a>
+        <a href="#">Random</a>
+      </div>
+    </div>
+
+    <div class="listings-count">
+      {properties.length} listings
+    </div>
+
+    <div class="property-grid">
+      {properties.map((prop) => (
+        <a href={`/${prop.slug}`} class="property-card">
+          <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
+            <span class="property-card-badge">{prop.bedrooms} BR</span>
+          </div>
+          <div class="property-card-body">
+            <h3>{prop.name}</h3>
+            {prop.description && (
+              <p class="property-card-desc">{prop.description}</p>
+            )}
+            <div class="property-card-meta">
+              <span>{prop.bedrooms} Bedrooms</span>
+              <span>{prop.bathrooms} Baths</span>
+              <span>Sleeps {prop.sleeps}</span>
+            </div>
+            <div class="property-card-price">
+              <span class="amount">${prop.nightlyRateMin}</span>
+              <span class="period">–${prop.nightlyRateMax}/night</span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    {properties.length === 0 && (
+      <p class="no-results">No listings found.</p>
+    )}
+  </section>
+</Layout>
+
+<style>
+.listings-page {
+  padding: 2rem 1rem;
+}
+
+.listings-header h1 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 1.5rem;
+}
+
+.search-filters {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.search-filters label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+.search-filters select,
+.sort-options button {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.btn-search {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: auto;
+  height: 2.375rem;
+}
+
+.btn-search:hover {
+  opacity: 0.9;
+}
+
+.sort-options {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.sort-options span {
+  font-weight: 600;
+}
+
+.sort-options a {
+  color: var(--text-color);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.sort-options a:hover,
+.sort-options a.active {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.listings-count {
+  margin-bottom: 1.5rem;
+  color: #666;
+}
+
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+</style>
+
+<script>
+  const filters = document.querySelector('.search-filters');
+  const sortOptions = document.querySelectorAll('.sort-options a');
+
+  if (filters) {
+    filters.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: Implement search functionality
+      console.log('Search with filters');
+    });
+  }
+
+  if (sortOptions.length > 0) {
+    sortOptions.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        sortOptions.forEach(s => s.classList.remove('active'));
+        link.classList.add('active');
+        // TODO: Implement sorting functionality
+        console.log(`Sorted by: ${link.textContent}`);
+      });
+    });
+  }
+</script>
