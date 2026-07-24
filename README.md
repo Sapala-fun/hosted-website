@@ -16,7 +16,7 @@ flowchart LR
   B --> E[OwnerRez Hosted<br/>Booking Page]
 ```
 
-## Structure
+## Project Structure
 
 | Directory | Purpose |
 |-----------|---------|
@@ -25,40 +25,50 @@ flowchart LR
 | `docs/` | Documentation including OwnerRez API reference |
 | `.github/workflows/` | CI/CD pipelines for both services |
 
-## Local development
+## Local Development
 
 ### Full stack (one command)
 ```bash
-cd backend && go run .
+make dev
 ```
 Visit http://localhost:3001 — serves both frontend and API.
 
 ### Separate processes (mirrors production)
-**Terminal 1 — Backend:**
 ```bash
-cd backend && go run .
+make dev-separate
+```
+- Frontend: http://localhost:4321 (hot-reload enabled)
+- API: http://localhost:3001
+
+## Environment Setup
+
+Create `backend/.env` with:
+```bash
+OWNERREZ_API_BASE_URL="https://api.ownerrez.com"
+OWNERREZ_EMAIL="your-email@example.com"
+OWNERREZ_PERSONAL_TOKEN="your-personal-token-here"
 ```
 
-**Terminal 2 — Frontend:**
-```bash
-cd frontend && npm install && npm run dev
-```
-Visit http://localhost:4321 — calls API at http://localhost:3001.
+The backend authenticates in this order: Personal Token → API Key → OAuth Token.
 
-## OwnerRez integration
+## Testing
 
-### Current: Personal Token
-```bash
-export OWNERREZ_API_BASE_URL="https://api.ownerrez.com"
-export OWNERREZ_PERSONAL_TOKEN="your-personal-token"
-```
+| Command | Description |
+|---------|-------------|
+| `make test-all` | Run all tests (backend + frontend) |
+| `make test-backend` | Backend unit tests |
+| `make test-frontend` | Frontend Vitest tests |
+| `make test-backend-api` | Backend API connection tests (validates `.env`) |
 
-### Future: OAuth 2.0 (to be implemented)
-```bash
-export OWNERREZ_OAUTH_TOKEN="your-oauth-token"
-```
+## Linting & Validation
 
-The backend prioritizes credentials in this order: Personal Token → API Key → OAuth Token.
+| Command | Description |
+|---------|-------------|
+| `make lint-backend` | Go vet or golangci-lint |
+| `make lint-frontend` | ESLint/Prettier |
+| `make build-frontend` | Build Astro static site |
+
+**Rule**: If you modify frontend files, run `make build-frontend` before backend testing.
 
 ## Deployment
 
@@ -67,20 +77,20 @@ The backend prioritizes credentials in this order: Personal Token → API Key �
 2. GitHub Actions auto-deploys via `.github/workflows/deploy-pages.yml`
 
 ### Backend (Google Cloud Run)
-1. Set secrets in GitHub repo settings:
-   - `GCLOUD_SERVICE_ACCOUNT_KEY` — GCP service account JSON
-   - `GCLOUD_REGION` — e.g., `us-central1`
-   - `GCLOUD_PROJECT` — your GCP project ID
-   - `OWNERREZ_PERSONAL_TOKEN` — your OwnerRez personal token
-2. Push to `main` branch
-3. GitHub Actions auto-deploys via `.github/workflows/deploy-backend.yml`
+Set secrets in GitHub repo settings:
+- `GCLOUD_SERVICE_ACCOUNT_KEY` — GCP service account JSON
+- `GCLOUD_REGION` — e.g., `us-central1`
+- `GCLOUD_PROJECT` — your GCP project ID
+- `OWNERREZ_PERSONAL_TOKEN` — your OwnerRez personal token
 
-## Design flexibility
+Then push to `main` branch → GitHub Actions auto-deploys via `.github/workflows/deploy-backend.yml`
+
+## Design Flexibility
 
 The Astro frontend uses a modular CSS approach. To try alternative designs:
 1. Copy `frontend/src/styles/global.css` to a new file (e.g., `global-modern.css`)
 2. Update the import in `frontend/src/layouts/Layout.astro`
-3. Preview locally with `npm run dev`
+3. Preview locally with `make dev-separate`
 4. Switch back anytime
 
 ## Notes
@@ -89,3 +99,5 @@ The Astro frontend uses a modular CSS approach. To try alternative designs:
 - Cloud Run has a generous free tier
 - OwnerRez API secrets stay on the backend, never in the browser
 - Booking currently uses OwnerRez's hosted booking page
+
+See [AGENTS.md](./AGENTS.md) for developer workflow guidelines.
