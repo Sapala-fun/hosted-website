@@ -78,9 +78,24 @@ lint-backend: ## Lint Go code (golangci-lint if available, otherwise golint)
 	else \
 		cd backend && go vet ./...; \
 	fi
+	@echo "Running pre-commit hooks for backend..."
+	@if [ -d .git ] && command -v pre-commit &> /dev/null; then \
+		pre-commit run --files $$(git ls-files backend/ | tr '\n' ' ') || true; \
+	fi
 
 lint-frontend: ## Lint frontend code (ESLint/Prettier)
 	@cd frontend && npm run lint || echo "No lint script found, skipping"
+	@echo "Running pre-commit hooks for frontend..."
+	@if [ -d .git ] && command -v pre-commit &> /dev/null; then \
+		pre-commit run --files $$(git ls-files frontend/ | grep -E '\.(js|ts|json)$$' | tr '\n' ' ') || true; \
+	fi
+
+lint: ## Run all linters (backend + frontend)
+	@echo "Linting backend..."
+	@make lint-backend
+	@echo ""
+	@echo "Linting frontend..."
+	@make lint-frontend
 
 clean: ## Remove build outputs and binaries
 	@rm -rf frontend/dist frontend/.astro frontend/src/styles/theme.css bin/ backend/coverage.out
