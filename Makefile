@@ -10,8 +10,7 @@ install: ## Install pre-commit hooks and dependencies
 		pre-commit install; \
 	else \
 		echo " Installing pre-commit via pip..."; \
-		pip3 install --user pre-commit black; \
-		pre-commit install; \
+		pip3 install --user pre-commit black || true; \
 	fi
 	@echo ""
 	@echo "Installing frontend dependencies..."
@@ -84,21 +83,17 @@ test: ## Run all tests (backend + frontend)
 	@echo "All tests passed!"
 
 lint-backend: ## Lint Go code (golangci-lint if available, otherwise go vet)
-	@if command -v golangci-lint &> /dev/null; then \
-		cd backend && golangci-lint run ./...; \
-	else \
-		cd backend && go vet ./...; \
-	fi
+	@if command -v golangci-lint >/dev/null 2>&1; then cd backend && golangci-lint run ./...; else cd backend && go vet ./...; fi
 
 lint-frontend: ## Lint frontend code (Prettier + ESLint)
 	@cd frontend && npm run lint || echo "No lint script found, skipping"
 
 lint: ## Run all linters (backend + frontend)
 	@echo "Linting backend..."
-	@make lint-backend
+	@if command -v golangci-lint >/dev/null 2>&1; then cd backend && golangci-lint run ./...; else cd backend && go vet ./...; fi
 	@echo ""
 	@echo "Linting frontend..."
-	@make lint-frontend
+	@cd frontend && npm run lint || echo "No lint script found, skipping"
 
 clean: ## Remove build outputs and binaries
 	@rm -rf frontend/dist frontend/.astro frontend/src/styles/theme.css bin/ backend/coverage.out
