@@ -1,4 +1,4 @@
-.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test-all lint-backend lint-frontend lint clean clean-all help install
+.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test lint-backend lint-frontend lint clean clean-all help install
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
@@ -57,6 +57,7 @@ build: ## Build both frontend and backend
 	@echo "Building Go backend..."
 	@mkdir -p bin
 	@cd backend && go build -o ../bin/ownerrez-proxy .
+
 test-backend: ## Run backend unit tests
 	@cd backend && go test ./...
 
@@ -73,14 +74,9 @@ test-backend-short: ## Run backend tests only (no network)
 test-frontend: ## Run frontend tests (Vitest)
 	@cd frontend && npm test
 
-test-all: ## Run all tests (backend + frontend)
-	@echo "Running backend tests..."
-	@cd backend && go test ./...
-	@echo ""
-	@echo "Running frontend tests..."
-	@cd frontend && npm test
-	@echo ""
-	@echo "All tests passed!"
+test: ## Run all tests (backend + frontend)
+	@make test-backend
+	@make test-frontend
 
 lint-backend: ## Lint Go code (golangci-lint if available, otherwise golint)
 	@if command -v golangci-lint &> /dev/null; then \
