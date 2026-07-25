@@ -76,7 +76,12 @@ test-frontend: ## Run frontend tests (Vitest)
 
 test: ## Run all tests (backend + frontend)
 	@make test-backend
+	@make test-backend-api
+	@make test-backend-cover
+	@make test-backend-short
 	@make test-frontend
+	@echo ""
+	@echo "All tests passed!"
 
 lint-backend: ## Lint Go code (golangci-lint if available, otherwise golint)
 	@if command -v golangci-lint &> /dev/null; then \
