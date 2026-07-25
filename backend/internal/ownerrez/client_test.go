@@ -10,7 +10,6 @@ import (
 )
 
 func loadEnvFile() {
-	// Try to load .env file from parent directory (hosted-website/backend/)
 	envPath := filepath.Join("..", "..", ".env")
 	file, err := os.Open(envPath)
 	if err != nil {
@@ -21,13 +20,10 @@ func loadEnvFile() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
-
-		// Skip empty lines and comments
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
 
-		// Parse KEY=VALUE
 		parts := strings.SplitN(line, "=", 2)
 		if len(parts) != 2 {
 			continue
@@ -36,7 +32,6 @@ func loadEnvFile() {
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
 
-		// Remove surrounding quotes if present
 		if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
 			value = value[1 : len(value)-1]
 		}
@@ -46,12 +41,13 @@ func loadEnvFile() {
 }
 
 func TestGetProperties(t *testing.T) {
-	// Load env from parent directory's .env
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
 	loadEnvFile()
 
 	client := NewClient()
 
-	// Verify credentials are configured
 	if client.BaseURL == "" {
 		t.Fatal("OWNERREZ_API_BASE_URL is not configured")
 	}
@@ -83,6 +79,9 @@ func TestGetProperties(t *testing.T) {
 }
 
 func TestGetPropertyDetails(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
 	loadEnvFile()
 	client := NewClient()
 
@@ -90,7 +89,6 @@ func TestGetPropertyDetails(t *testing.T) {
 		t.Fatal("Credentials not configured")
 	}
 
-	// First get properties to find a valid slug
 	properties, err := client.GetProperties()
 	if err != nil {
 		t.Fatalf("GetProperties() failed: %v", err)
@@ -100,11 +98,9 @@ func TestGetPropertyDetails(t *testing.T) {
 		t.Fatal("No properties found to test with")
 	}
 
-	// Use the first property's public_url slug (extract from URL)
 	slug := ""
 	for _, prop := range properties {
 		if publicURL, ok := prop["public_url"].(string); ok && publicURL != "" {
-			// Extract slug from URL like https://www.sapala.fun/sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x
 			parts := strings.Split(strings.TrimSuffix(publicURL, "/"), "/")
 			if len(parts) > 0 {
 				slug = parts[len(parts)-1]
@@ -138,6 +134,9 @@ func TestGetPropertyDetails(t *testing.T) {
 }
 
 func TestClientAuthHeader(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
 	loadEnvFile()
 	client := NewClient()
 
@@ -147,7 +146,6 @@ func TestClientAuthHeader(t *testing.T) {
 		t.Fatal("authHeader() returned empty string - check .env credentials")
 	}
 
-	// For personal token, should be Basic auth with email:token
 	if client.Token[:3] == "pt_" && len(header) > 6 {
 		if header[:6] != "Basic " {
 			t.Errorf("Expected 'Basic ' prefix for personal token auth, got: %s", header[:6])
@@ -162,6 +160,9 @@ func TestClientAuthHeader(t *testing.T) {
 }
 
 func TestGetAvailability(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping API test in short mode")
+	}
 	loadEnvFile()
 	client := NewClient()
 
@@ -169,7 +170,6 @@ func TestGetAvailability(t *testing.T) {
 		t.Fatal("Credentials not configured")
 	}
 
-	// First get properties to find a property ID
 	properties, err := client.GetProperties()
 	if err != nil {
 		t.Fatalf("GetProperties() failed: %v", err)
@@ -179,7 +179,6 @@ func TestGetAvailability(t *testing.T) {
 		t.Skip("No properties found, skipping availability test")
 	}
 
-	// Use the first property's ID (assuming it's a number)
 	var propertyID int
 	for _, prop := range properties {
 		if idVal, ok := prop["id"].(int); ok {
@@ -194,7 +193,6 @@ func TestGetAvailability(t *testing.T) {
 
 	fmt.Printf("Testing GetAvailability for property ID: %d\n", propertyID)
 
-	// Test for July 2026
 	availability, err := client.GetAvailability(propertyID, 2026, 7)
 	if err != nil {
 		t.Fatalf("GetAvailability() failed: %v", err)

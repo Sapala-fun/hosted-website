@@ -36,15 +36,19 @@ jobs:
           go mod download
           go mod tidy
 
-      - name: Run make lint
-        run: make lint-backend && cd frontend && npm run lint || echo "Lint skipped"
+      - name: Run make lint-backend
+        run: make lint-backend
 
-      - name: Run make test
-        run: make test
+      - name: Run make test (short mode)
+        run: cd backend && go test -short ./...
 
-      - name: Build frontend (without theme change)
-        run: |
-          cd frontend && npm run build
+      - name: Run frontend tests
+        working-directory: frontend
+        run: npm test
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
 
       - name: Build Go binary
         run: |
