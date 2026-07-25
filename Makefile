@@ -106,4 +106,3 @@ clean-all: ## Remove all generated files including dependencies
 	@$(MAKE) clean
 	@rm -rf frontend/node_modules backend/node_modules
 	@echo "Cleaned all artifacts and dependencies"
-	@echo "Cleaned build artifacts"
