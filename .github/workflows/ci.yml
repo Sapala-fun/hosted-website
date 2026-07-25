@@ -25,18 +25,6 @@ jobs:
         working-directory: frontend
         run: npm ci --ignore-scripts
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install pre-commit and black
-        run: |
-          pip install pre-commit black
-
-      - name: Run make install (pre-commit + frontend)
-        run: make install
-
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
