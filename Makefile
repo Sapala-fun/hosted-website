@@ -1,8 +1,27 @@
-.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test-all lint-backend lint-frontend lint clean clean-all help
+.PHONY: dev dev-separate build-backend build-frontend test-backend test-frontend test-all lint-backend lint-frontend lint clean clean-all help install
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
+
+install: ## Install pre-commit hooks and dependencies
+	@echo "Installing pre-commit..."
+	@if command -v pre-commit &> /dev/null; then \
+		pre-commit install; \
+	else \
+		echo " Installing pre-commit via pip..."; \
+		pip3 install --user pre-commit black; \
+		pre-commit install; \
+	fi
+	@echo ""
+	@echo "Installing frontend dependencies..."
+	@if [ -d frontend/node_modules ]; then \
+		cd frontend && npm install; \
+	else \
+		cd frontend && npm install; \
+	fi
+	@echo ""
+	@echo "Install complete! Run 'make dev' to start development."
 
 dev: ## Run backend + frontend locally (one process)
 	@echo "Building Astro frontend..."
