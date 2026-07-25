@@ -47,6 +47,16 @@ build-frontend: ## Build the Astro static site
 	fi
 	@cd frontend && npm run build
 
+build: ## Build both frontend and backend
+	@echo "Building Astro frontend..."
+	@if [ ! -f frontend/src/styles/theme.css ]; then \
+		bash scripts/switch-theme.sh classic; \
+	fi
+	@cd frontend && npm run build
+	@echo ""
+	@echo "Building Go backend..."
+	@mkdir -p bin
+	@cd backend && go build -o ../bin/ownerrez-proxy .
 test-backend: ## Run backend unit tests
 	@cd backend && go test ./...
 
