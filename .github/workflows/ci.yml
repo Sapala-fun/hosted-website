@@ -1,0 +1,64 @@
+name: CI - Build, Test & Lint
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pre-commit and black
+        run: |
+          pip install pre-commit black
+
+      - name: Run make install (pre-commit + frontend)
+        run: make install
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Download Go dependencies
+        run: |
+          cd backend
+          go mod download
+          go mod tidy
+
+      - name: Run make lint
+        run: make lint
+
+      - name: Run make test
+        run: make test
+
+      - name: Build frontend (without theme change)
+        run: |
+          cd frontend && npm run build
+
+      - name: Build Go binary
+        run: |
+          mkdir -p bin
+          cd backend && go build -o ../bin/ownerrez-proxy .
