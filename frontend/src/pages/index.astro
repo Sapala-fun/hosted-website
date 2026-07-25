@@ -1,0 +1,220 @@
+---
+import Layout from '../components/Layout.astro';
+import type { Property } from '../types';
+import { apiBaseUrl } from '../config/site';
+
+  // Fetch properties from OwnerRez API at build time with fallback
+let properties: Property[] = [];
+
+const fallbackImages: Record<string, string> = {
+  'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x': 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+  'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x': 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+  'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx': 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+};
+
+try {
+  const res = await fetch(`${apiBaseUrl}/api/properties`, { signal: AbortSignal.timeout(5000) });
+  if (res.ok) {
+    const data = await res.json();
+    // Use API data if available and not empty, otherwise use fallback
+    if (data.properties && data.properties.length > 0) {
+      properties = data.properties.map((p: any) => ({
+        id: p.id || '',
+        slug: p.slug || '',
+        name: p.name || '',
+        description: p.description || '',
+        bedrooms: p.bedrooms || 0,
+        bathrooms: p.bathrooms || 0,
+        sleeps: String(p.sleeps || ''),
+        nightlyRateMin: p.nightlyRateMin || p.nightlyRate || 0,
+        nightlyRateMax: p.nightlyRateMax || 0,
+        imageUrl: p.imageUrl || fallbackImages[p.slug] || '',
+      }));
+    }
+  }
+  // If we still have no properties, use hardcoded fallback
+  if (properties.length === 0) {
+    properties = [
+      {
+        id: 'orp5b5eae5x',
+        slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x',
+        name: 'Sapala All',
+        description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
+        bedrooms: 5,
+        bathrooms: 5,
+        sleeps: '11-13',
+        nightlyRateMin: 329,
+        nightlyRateMax: 998,
+        imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      },
+      {
+        id: 'orp5b5e872x',
+        slug: 'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x',
+        name: 'Sapala 1',
+        description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
+        bedrooms: 4,
+        bathrooms: 4,
+        sleeps: '8-10',
+        nightlyRateMin: 269,
+        nightlyRateMax: 398,
+        imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+      },
+      {
+        id: 'orp5b5e89fx',
+        slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx',
+        name: 'Sapala 2',
+        description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
+        bedrooms: 1,
+        bathrooms: 1,
+        sleeps: '2',
+        nightlyRateMin: 119,
+        nightlyRateMax: 198,
+        imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+      },
+    ];
+  }
+} catch (error) {
+  // Use hardcoded fallback if fetch fails entirely
+  properties = [
+    {
+      id: 'orp5b5eae5x',
+      slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x',
+      name: 'Sapala All',
+      description: 'Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea.',
+      bedrooms: 5,
+      bathrooms: 5,
+      sleeps: '11-13',
+      nightlyRateMin: 329,
+      nightlyRateMax: 998,
+      imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+    },
+    {
+      id: 'orp5b5e872x',
+      slug: 'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x',
+      name: 'Sapala 1',
+      description: 'Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea.',
+      bedrooms: 4,
+      bathrooms: 4,
+      sleeps: '8-10',
+      nightlyRateMin: 269,
+      nightlyRateMax: 398,
+      imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+    },
+    {
+      id: 'orp5b5e89fx',
+      slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx',
+      name: 'Sapala 2',
+      description: 'Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean.',
+      bedrooms: 1,
+      bathrooms: 1,
+      sleeps: '2',
+      nightlyRateMin: 119,
+      nightlyRateMax: 198,
+      imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+    },
+  ];
+}
+
+function getPropertySlug(p: any): string {
+  // Check if slug exists and is non-empty
+  const slug = p.slug?.trim();
+  if (slug) {
+    // Return slug as-is (it should include the ID suffix)
+    return slug;
+  }
+  
+  // Fallback to just id if slug is empty/missing
+  return p.id?.toString().trim() || '';
+}
+
+const heroSlides = [
+  'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+  'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+  'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
+];
+
+const features = [
+  { icon: '🏖️', title: 'Private Beach', desc: '0.8 acres of pristine oceanfront' },
+  { icon: '🏊', title: 'Shared & Private Pools', desc: 'Choose your perfect setting' },
+  { icon: '🌅', title: 'Stunning Views', desc: 'Panoramic Caribbean sunsets' },
+  { icon: '✨', title: 'Luxury Amenities', desc: 'Fully equipped modern kitchens' },
+];
+---
+
+<Layout title="Home" description="Oceanfront Villas in St. Croix, USVI">
+  <!-- Hero Carousel -->
+  <section class="hero">
+    {heroSlides.map((url, i) => (
+      <div class={`hero-slide${i === 0 ? ' active' : ''}`} style={`background-image: url('${url}');`}></div>
+    ))}
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>Oceanfront Villas in St. Croix</h1>
+      <p>Experience the Caribbean in luxury. Three unique properties on a stunning 0.8-acre oceanfront estate.</p>
+      <a href="#properties" class="btn-book">View Properties</a>
+    </div>
+    <div class="hero-scroll-indicator">↓</div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <div class="section-header">
+      <span class="section-label">Why Sapala</span>
+      <h2 class="section-title">A Caribbean Retreat Like No Other</h2>
+      <p class="section-subtitle">Three distinct properties, one extraordinary oceanfront estate</p>
+    </div>
+    <div class="features-grid">
+      {features.map((feature) => (
+        <div class="feature-item">
+          <div class="feature-icon">{feature.icon}</div>
+          <h3>{feature.title}</h3>
+          <p>{feature.desc}</p>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Property Listings -->
+  <section class="section" id="properties">
+    <div class="section-header">
+      <span class="section-label">Our Properties</span>
+      <h2 class="section-title">3 Exclusive Listings</h2>
+      <p class="section-subtitle">Choose from our oceanfront villas and apartments</p>
+    </div>
+    <div class="property-grid">
+      {properties.map((prop) => (
+        <a href={`/${getPropertySlug(prop)}`} class="property-card">
+          <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
+            <span class="property-card-badge">{prop.bedrooms} BR</span>
+          </div>
+          <div class="property-card-body">
+            <h3>{prop.name}</h3>
+            {prop.description && (
+              <p class="property-card-desc">{prop.description}</p>
+            )}
+            <div class="property-card-meta">
+              <span>{prop.bedrooms} Bedrooms</span>
+              <span>{prop.bathrooms} Baths</span>
+              <span>Sleeps {prop.sleeps}</span>
+            </div>
+            <div class="property-card-price">
+              <span class="amount">${prop.nightlyRateMin}</span>
+              <span class="period">/night</span>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Scripts for carousel -->
+  <script>
+    const slides = document.querySelectorAll('.hero-slide');
+    let current = 0;
+    setInterval(() => {
+      slides[current]?.classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current]?.classList.add('active');
+    }, 5000);
+  </script>
+</Layout>

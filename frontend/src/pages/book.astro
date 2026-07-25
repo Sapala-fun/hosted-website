@@ -1,0 +1,96 @@
+---
+import Layout from '../components/Layout.astro';
+import { apiBaseUrl } from '../config/site';
+
+// Property-specific OwnerRez booking URLs
+const propertyBookingUrls: Record<string, string> = {
+  'sapala-all-exclusive-oceanfront-villa-with-private-pool': 'https://www.ownerrez.com/book/sapala-all',
+  'sapala-1-oceanfront-main-house-with-shared-pool': 'https://www.ownerrez.com/book/sapala-1',
+  'sapala-2-oceanfront-poolside-apt-with-shared-pool': 'https://www.ownerrez.com/book/sapala-2',
+};
+
+const properties = [
+  {
+    id: 'orp5b5eae5x',
+    slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool',
+    name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
+    description: 'Rent the entire villa with both units exclusively.',
+    bedrooms: 5,
+    bathrooms: 5,
+    sleeps: '11-13',
+    nightlyRateMin: 329,
+    imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+  },
+  {
+    id: 'orp5b5e872x',
+    slug: 'sapala-1-oceanfront-main-house-with-shared-pool',
+    name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
+    description: '4 bedroom oceanfront main house.',
+    bedrooms: 4,
+    bathrooms: 4,
+    sleeps: '8-10',
+    nightlyRateMin: 269,
+    imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+  },
+  {
+    id: 'orp5b5e89fx',
+    slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool',
+    name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
+    description: '1 bedroom poolside apartment facing the ocean.',
+    bedrooms: 1,
+    bathrooms: 1,
+    sleeps: '2',
+    nightlyRateMin: 119,
+    imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+  },
+];
+---
+
+<Layout title="Book Your Stay" description="Reserve your oceanfront villa in St. Croix">
+  <section class="booking-section">
+    <div class="booking-card">
+      <span class="section-label">Reservation</span>
+      <h1>Book Your Stay</h1>
+      <p class="section-subtitle">Choose a property and complete your reservation through OwnerRez's secure booking platform.</p>
+
+      <!-- Property Selection -->
+      <div class="property-selection" style="margin:2rem 0;">
+        {properties.map((prop) => (
+          <div class="booking-property-card" style="display:flex; gap:1.5rem; padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:1rem; align-items:center;">
+            <img src={prop.imageUrl} alt={prop.name} style="width:120px; height:80px; object-fit:cover; border-radius:8px;" />
+            <div style="flex:1;">
+              <h3 style="margin:0 0 0.25rem 0;">{prop.name}</h3>
+              <p style="color:var(--color-text-muted); margin:0; font-size:0.95rem;">{prop.description} &middot; {prop.bedrooms} BR &middot; {prop.bathrooms} BA &middot; Sleeps {prop.sleeps}</p>
+            </div>
+            <div style="text-align:right;">
+              <p style="font-size:1.2rem; font-weight:700; color:var(--color-accent-dark); margin:0;">${prop.nightlyRateMin}/night</p>
+              <a href={propertyBookingUrls[prop.slug] || '/book'} target="_blank" rel="noopener" class="btn-book" style="font-size:0.9rem; padding:0.6rem 1.5rem; margin-top:0.5rem; display:inline-block; text-decoration:none;">Book Now</a>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="booking-features">
+        <div class="booking-feature">
+          <div class="booking-feature-icon">🔒</div>
+          <p>Secure Payment</p>
+        </div>
+        <div class="booking-feature">
+          <div class="booking-feature-icon">⚡</div>
+          <p>Instant Confirmation</p>
+        </div>
+        <div class="booking-feature">
+          <div class="booking-feature-icon">↩️</div>
+          <p>Free Cancellation</p>
+        </div>
+      </div>
+
+      <div style="margin-top:2.5rem; padding-top:2rem; border-top:1px solid var(--color-border);">
+        <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Need help?</h3>
+        <p style="color:var(--color-text-muted); font-size:0.95rem;">
+          Contact us at <a href="mailto:info@sapala.fun" style="color:var(--color-accent-dark); font-weight:600;">info@sapala.fun</a> or call us directly.
+        </p>
+      </div>
+    </div>
+  </section>
+</Layout>

@@ -1,0 +1,168 @@
+---
+import Layout from '../components/Layout.astro';
+import type { Property } from '../types';
+import { apiBaseUrl } from '../config/site';
+
+let properties: Property[] = [];
+
+try {
+  const res = await fetch(`${apiBaseUrl}/api/properties`, {
+    signal: AbortSignal.timeout(5000),
+    next: { revalidate: 3600 }
+  });
+  if (res.ok) {
+    const data = await res.json();
+    if (data.properties && data.properties.length > 0) {
+      properties = data.properties.map((p: any) => ({
+        id: p.id || '',
+        slug: p.slug || '',
+        name: p.name || '',
+        description: p.description || '',
+        bedrooms: p.bedrooms || 0,
+        bathrooms: p.bathrooms || 0,
+        sleeps: String(p.sleeps || ''),
+        nightlyRateMin: p.nightlyRateMin || p.nightlyRate || 0,
+        nightlyRateMax: p.nightlyRateMax || 0,
+        imageUrl: p.imageUrl || '',
+      }));
+    }
+  }
+} catch (error) {
+  properties = [];
+}
+---
+
+<Layout title="Map" description="Map of Sapala.Fun Properties">
+  <section class="section map-page">
+    <h1>Map</h1>
+    
+    {properties.length > 0 && (
+      <div class="map-container">
+        <div id="map" class="google-map"></div>
+        
+        <div class="map-listing-details">
+          {properties.map((prop, index) => (
+            <div class="listing-card" data-index={index}>
+              <a href={`/${prop.slug}`}>
+                <img 
+                  src={prop.imageUrl.replace('-Large', '-Thumb')} 
+                  alt={prop.name}
+                  loading="lazy"
+                />
+              </a>
+              <h3><a href={`/${prop.slug}`}>{prop.name}</a></h3>
+              <div class="listing-meta">
+                <span>{prop.bedrooms} br</span> • 
+                <span>{prop.bathrooms} ba</span> • 
+                <span>${prop.nightlyRateMin}-${prop.nightlyRateMax}/night</span>
+              </div>
+              <div class="listing-sleeps">Sleeps {prop.sleeps}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {properties.length === 0 && (
+      <p class="no-results">No listings available.</p>
+    )}
+  </section>
+</Layout>
+
+<style>
+.map-page {
+  padding: 2rem 1rem;
+}
+
+.map-page h1 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 2rem;
+}
+
+.map-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .map-container {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.google-map {
+  width: 100%;
+  height: 500px;
+  border-radius: 8px;
+  background: #e5e3df;
+}
+
+.map-listing-details {
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
+.listing-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s ease;
+}
+
+.listing-card:hover {
+  transform: translateY(-2px);
+}
+
+.listing-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+}
+
+.listing-card h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem 0;
+}
+
+.listing-card h3 a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.listing-meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #666;
+  margin-bottom: 0.25rem;
+}
+
+.listing-sleeps {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+</style>
+
+<script>
+export async function load() {
+  const res = await fetch(`${import.meta.env.PUBLIC_API_BASE_URL || 'http://localhost:3001'}/api/properties`, {
+    signal: AbortSignal.timeout(5000),
+    next: { revalidate: 3600 }
+  });
+  
+  if (res.ok) {
+    const data = await res.json();
+    return {
+      properties: data.properties || []
+    };
+  }
+  
+  return { properties: [] };
+}
+</script>

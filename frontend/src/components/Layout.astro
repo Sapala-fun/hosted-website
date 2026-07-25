@@ -1,0 +1,84 @@
+---
+import '../styles/classic.css';
+import type { Props } from '../types';
+
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Oceanfront Villas in St. Croix, USVI' } = Astro.props;
+
+const properties = [
+  {
+    slug: '/sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x',
+    name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool'
+  },
+  {
+    slug: '/sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x',
+    name: 'Sapala 1 - Oceanfront Main House with Shared Pool'
+  },
+  {
+    slug: '/sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx',
+    name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool'
+  }
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content={description} />
+    <title>{title} | Sapala.Fun</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="top-bar">
+      <p>Admin Login | Guest Reviews | <a href="mailto:info@sapala.fun">Email</a></p>
+    </div>
+    <header class="site-header">
+      <nav class="nav-inner">
+        <a href="/" class="nav-logo">Sapala.Fun</a>
+        <button class="mobile-toggle" aria-label="Toggle navigation menu">☰</button>
+        <ul class="nav-links">
+          <li><a href="/">Home</a></li>
+          <li class="dropdown">
+            <a href="/properties">Listings</a>
+            <ul class="dropdown-menu">
+              {properties.map((prop) => (
+                <li><a href={prop.slug} external>{prop.name}</a></li>
+              ))}
+            </ul>
+          </li>
+          <li><a href="/map">Map</a></li>
+          <li><a href="/availability">Availability</a></li>
+          <li><a href="/reviews">Reviews</a></li>
+          <li><a href="/book" class="btn-book">Book Now</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <p>&copy; {new Date().getFullYear()} SAPALA.FUN &middot; <a href="tel:">Call</a> &middot; <a href="mailto:info@sapala.fun">INFO@SAPALA.FUN</a></p>
+        <div class="social-links">
+          <a href="https://facebook.com/sapala" target="_blank" rel="noopener">Facebook</a>
+          <a href="https://instagram.com/sapala" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://youtube.com/@sapala" target="_blank" rel="noopener">YouTube</a>
+          <a href="https://twitter.com/sapala" target="_blank" rel="noopener">X (Twitter)</a>
+        </div>
+      </div>
+    </footer>
+
+    <slot name="scripts" />
+  </body>
+</html>

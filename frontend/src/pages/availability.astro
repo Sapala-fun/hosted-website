@@ -1,0 +1,283 @@
+---
+import Layout from '../components/Layout.astro';
+import { apiBaseUrl } from '../config/site';
+---
+
+<Layout title="Availability" description="Multi-month availability calendar for Sapala.Fun properties">
+  <section class="section availability-page">
+    <h1>Availability Calendar</h1>
+    <p style="color:#6b7280; margin-bottom:1.5rem;">Check real-time availability and book your stay</p>
+    
+    <div id="availabilityCalendar" data-api-base={apiBaseUrl} class="availability-calendar">
+      <div class="availability-calendar-header">
+        <h3 class="availability-calendar-title">Available Dates</h3>
+        <div class="calendar-month-nav">
+          <button type="button" id="prevMonthsBtn" class="btn-month-nav">< Prev 6 Months</button>
+          <button type="button" id="resetMonthBtn" class="btn-month-nav" style="background:#3b82f6; color:white;">Reset</button>
+          <button type="button" id="nextMonthsBtn" class="btn-month-nav">Next 6 Months ></button>
+        </div>
+      </div>
+      
+      <div id="calendarContainer" class="calendar-grid-container">
+        <!-- months will be loaded here -->
+      </div>
+      
+      <div class="legend-container">
+        <div class="legend-item">
+          <div class="legend-color" style="background:#fee2e2;"></div>
+          <span class="legend-label">Blocked</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#fed7aa;"></div>
+          <span class="legend-label">Reserved</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#d1fae5;"></div>
+          <span class="legend-label">Available (Weekday)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background:#fef3c7;"></div>
+          <span class="legend-label">Available (Weekend)</span>
+        </div>
+      </div>
+      
+      <p id="availabilityNote" style="margin-top:1rem; font-size:0.9rem; color:#6b7280;"></p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+.availability-page {
+  padding: 2rem 1rem;
+}
+.availability-page h1 {
+  font-family: 'Playfair Display', serif;
+  margin-bottom: 1.5rem;
+}
+.availability-calendar {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.availability-page h1 {
+  font-size: 2rem;
+}
+</style>
+
+<script>
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth() + 1;
+
+const apiBase = document.getElementById('availabilityCalendar')?.dataset.apiBase || '';
+const calendarContainer = document.getElementById('calendarContainer');
+
+async function loadMonths(year, month, count) {
+  if (!apiBase) {
+    showErrorMessage('API not configured');
+    return;
+  }
+  
+  const monthsToLoad = [];
+  for (let i = 0; i < count; i++) {
+    let m = month + i;
+    let y = year;
+    
+    while (m > 12) {
+      m -= 12;
+      y++;
+    }
+    while (m < 1) {
+      m += 12;
+      y--;
+    }
+    
+    monthsToLoad.push({ year: y, month: m });
+  }
+  
+  try {
+    const promises = monthsToLoad.map(({ year, month }) => 
+      fetch(`${apiBase}/api/availability/all?year=${year}&month=${month}`)
+        .then(r => r.ok ? r.json() : null)
+    );
+    
+    const results = await Promise.all(promises);
+    renderMonths(results);
+    
+    updateLegend();
+  } catch (error) {
+    console.error('Error loading months:', error);
+    showErrorMessage('Could not load availability data. Please try again.');
+  }
+}
+
+function renderMonths(monthsData) {
+  calendarContainer.innerHTML = '';
+  
+  if (!monthsData || monthsData.every(d => !d)) {
+    showErrorMessage('No availability data available');
+    return;
+  }
+  
+  const todayStr = new Date().toISOString().split('T')[0];
+  
+  monthsData.forEach(data => {
+    if (!data) return;
+    
+    const monthName = new Date(data.year, data.month - 1).toLocaleDateString('en-US', { 
+      month: 'long',
+      year: 'numeric'
+    });
+    
+    const monthEl = document.createElement('div');
+    monthEl.className = 'availability-month';
+    
+    // Header
+    const header = document.createElement('div');
+    header.className = 'availability-month-header';
+    header.innerHTML = `<strong class="availability-month-title">${monthName}</strong>`;
+    monthEl.appendChild(header);
+    
+    // Grid container
+    const grid = document.createElement('div');
+    grid.className = 'calendar-grid';
+    
+    // Weekday headers
+    const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    weekdays.forEach(day => {
+      const headerCell = document.createElement('div');
+      headerCell.className = 'calendar-day-name';
+      headerCell.textContent = day;
+      grid.appendChild(headerCell);
+    });
+    
+    // Calendar days
+    const firstDay = new Date(data.year, data.month - 1, 1);
+    const lastDate = new Date(data.year, data.month, 0).getDate();
+    const startDay = firstDay.getDay();
+    
+    for (let i = 0; i < startDay; i++) {
+      const emptyCell = document.createElement('div');
+      grid.appendChild(emptyCell);
+    }
+    
+    const dates = data.dates || [];
+    
+    for (let day = 1; day <= lastDate; day++) {
+      const dateStr = `${data.year}-${String(data.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const isWeekend = [0, 6].includes(new Date(data.year, data.month - 1, day).getDay());
+      
+      const cell = document.createElement('div');
+      cell.className = 'availability-cell';
+      
+      if (dateStr === todayStr) cell.classList.add('today');
+      
+      // Find date info
+      const dateInfo = dates.find(d => d.date === dateStr);
+      
+      if (dateInfo && dateInfo.blocked) {
+        cell.classList.add(dateInfo.reason === 'Blocked' ? 'blocked': 'reserved');
+        cell.title = `${day} - ${dateInfo.reason || 'Reserved'}`;
+        
+        // Show date and reason
+        cell.innerHTML = `
+          <span class="day-number">${day}</span>
+          <span class="reason" style="font-size:0.6rem;color:#9a3412;">${dateInfo.reason?.substring(0, 8)}</span>
+        `;
+      } else {
+        cell.classList.add('available');
+        
+        if (isWeekend) cell.classList.add('weekend');
+        
+        // Show day and rate
+        const rate = dateInfo && dateInfo.nightlyRate ? Math.round(dateInfo.nightlyRate) : null;
+        cell.innerHTML = `
+          <span class="day-number">${day}</span>
+          ${rate ? `<span class="rate-info">$${rate}</span>` : ''}
+        `;
+      }
+      
+      grid.appendChild(cell);
+    }
+    
+    monthEl.appendChild(grid);
+    calendarContainer.appendChild(monthEl);
+  });
+  
+  updateStats(monthsData);
+}
+
+function updateLegend() {
+  const title = document.querySelector('.availability-calendar-title');
+  if (title) {
+    const totalMonths = document.querySelectorAll('.availability-month').length;
+    if (totalMonths > 1) {
+      title.textContent = `Availability - ${totalMonths} Months`;
+    }
+  }
+}
+
+function updateStats(monthsData) {
+  let totalDays = 0;
+  let availableDays = 0;
+  
+  monthsData.forEach(data => {
+    if (!data || !data.dates) return;
+    
+    data.dates.forEach(d => {
+      totalDays++;
+      if (!d.blocked) availableDays++;
+    });
+  });
+  
+  const noteEl = document.getElementById('availabilityNote');
+  if (noteEl) {
+    const percentage = Math.round((availableDays / totalDays) * 100);
+    noteEl.textContent = `${percentage}% of dates available across ${totalDays} days`;
+  }
+}
+
+function showErrorMessage(message) {
+  calendarContainer.innerHTML = 
+    `<div style="padding:2rem;text-align:center;color:#ef4444;">${message}</div>`;
+}
+
+// Initial load - show current month + next 5 months (6 total)
+loadMonths(currentYear, currentMonth, 6);
+
+// Navigation buttons
+const prevBtn = document.getElementById('prevMonthsBtn');
+const nextBtn = document.getElementById('nextMonthsBtn');
+const resetBtn = document.getElementById('resetMonthBtn');
+
+if (prevBtn) {
+  prevBtn.addEventListener('click', () => {
+    currentMonth -= 6;
+    if (currentMonth < 1) {
+      currentMonth += 12;
+      currentYear--;
+    }
+    loadMonths(currentYear, currentMonth, 6);
+  });
+}
+
+if (nextBtn) {
+  nextBtn.addEventListener('click', () => {
+    currentMonth += 6;
+    if (currentMonth > 12) {
+      currentMonth -= 12;
+      currentYear++;
+    }
+    loadMonths(currentYear, currentMonth, 6);
+  });
+}
+
+if (resetBtn) {
+  resetBtn.addEventListener('click', () => {
+    const now = new Date();
+    currentYear = now.getFullYear();
+    currentMonth = now.getMonth() + 1;
+    loadMonths(currentYear, currentMonth, 6);
+  });
+}
+</script>

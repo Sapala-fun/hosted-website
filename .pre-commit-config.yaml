@@ -1,0 +1,27 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^node_modules/
+      - id: end-of-file-fixer
+        exclude: ^node_modules/
+      - id: check-yaml
+      - id: check-json
+
+  - repo: https://github.com/ambv/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier (Frontend JS/JSON)
+        entry: bash -c "cd frontend && npx --yes prettier --write '**/*.{js,ts,json}'"
+        language: system
+        types_or: [javascript, json]
+        files: ^frontend/
+        exclude: node_modules

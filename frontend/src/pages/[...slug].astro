@@ -1,0 +1,551 @@
+---
+import Layout from '../components/Layout.astro';
+import { apiBaseUrl } from '../config/site';
+
+export async function getStaticPaths() {
+  return [
+    { params: { slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x' } },
+    { params: { slug: 'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x' } },
+    { params: { slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx' } },
+  ];
+}
+
+const { slug } = Astro.params;
+
+interface PropertyDetails {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  bedrooms: number;
+  bathrooms: number;
+  sleeps: string;
+  nightlyRateMin: number;
+  nightlyRateMax: number;
+  imageUrl: string;
+  photos: string[];
+  amenities: Array<{ category: string; value: string }>;
+  cancellationPolicy: string;
+  ownerName: string;
+  ownerBio: string;
+  location: string;
+  bookingUrl: string;
+  guestReviews: Array<{ comment: string; author: string }>;
+}
+
+// Helper to get absolute API URL (works in both SSR and client)
+function getApiUrl(path: string): string {
+  // If PUBLIC_API_BASE_URL is set, use it; otherwise default to localhost
+  const base = apiBaseUrl;
+  const fullUrl = `${base}${path}`;
+  console.log('[getApiUrl]', 'SSR:', import.meta.env.SSR, 'base:', JSON.stringify(base), 'path:', path, 'full:', fullUrl);
+  return fullUrl;
+}
+
+// Fallback data for all properties (used during build or if API fails)
+const fallbackDetails: Record<string, PropertyDetails> = {
+  'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x': {
+    id: 'orp5b5eae5x',
+    slug: 'sapala-all-exclusive-oceanfront-villa-with-private-pool-orp5b5eae5x',
+    name: 'Sapala All - Exclusive Oceanfront Villa with Private Pool',
+    description: `Incredible waterfront location for this large 5 bedroom rustic home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory's Jacks & Issac's Bay. A wall of windows for water views, year-round trade breezes and the soothing sound of waves from the shoreline below make for an unforgettable stay. Olympic style 50' seaside pool is delightful after a kayak or snorkeling excursion down in front.
+
+Entire Villa consisting of both the units: Sapala 1 (4 bedrooms) and Sapala 2 (1 bedroom) will be exclusively available to you and it will not be shared with anyone else.
+
+The base rate has been deliberately set lower, to make it affordable for smaller families to rent the property. However, each guest over 4+ are charged an additional daily fee of $40 per guest, up to a maximum of 13 guests.
+
+You will be renting the entire property with a private pool, which sits on a 0.8 acre land facing the ocean and consists of two units:
+
+(a) Sapala 1: an upstairs/main unit with 4 bedrooms/4 bathrooms, a large open kitchen / living / dining area and a game room on the loft. All bedrooms are of the same size and each has a big bathroom with double vanity sink and an empty closet space with hangers for your use.
+
+(b) Sapala 2: a downstairs/poolside unit with 1 bedroom/1bathroom, a full kitchen with living / dining area and a stacked washer/dryer unit.
+
+The two units have separate entrance and are NOT connected internally to each other. As part of "Sapala All", both the units will be rented to the guests in your party and will not be shared with anyone else at time of your stay.`,
+    bedrooms: 5,
+    bathrooms: 5,
+    sleeps: '11-13',
+    nightlyRateMin: 329,
+    nightlyRateMax: 998,
+    imageUrl: 'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+    photos: [
+      'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+      'https://uc.orez.io/i/3c7a5a5e041d428da773b238a6d16f82-Large',
+      'https://uc.orez.io/i/e54326e81085452d8cf7d08549812254-Large',
+      'https://uc.orez.io/i/4e43eef5ea214b219377738f20deef16-Large',
+    ],
+    amenities: [
+      { category: 'Listing Type', value: 'Villa' },
+      { category: 'Accommodation', value: 'Entire Home' },
+      { category: 'Check-In', value: 'Lockbox' },
+      { category: 'House Rules', value: 'Maximum occupancy: 13, Children welcome, Infants welcome' },
+      { category: 'Setting & View', value: 'Oceanfront, Ocean View, Shared Beach Access' },
+    ],
+    cancellationPolicy: 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to arrival.',
+    ownerName: '',
+    ownerBio: '',
+    location: 'Christiansted, St. Croix, USVI',
+    bookingUrl: '',
+    guestReviews: [],
+  },
+  'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x': {
+    id: 'orp5b5e872x',
+    slug: 'sapala-1-oceanfront-main-house-with-shared-pool-orp5b5e872x',
+    name: 'Sapala 1 - Oceanfront Main House with Shared Pool',
+    description: `Incredible waterfront location for this large 4 bedroom home on the sparkling shore of the Caribbean Sea. Walking distance to a nearby beach and the Nature Conservatory's Jacks & Issac's Bay. A wall of windows for water views, year-round trade breezes and the soothing sound of waves from the shoreline below make for an unforgettable stay.
+
+One bedroom poolside unit is rented separately.`,
+    bedrooms: 4,
+    bathrooms: 4,
+    sleeps: '8-10',
+    nightlyRateMin: 269,
+    nightlyRateMax: 398,
+    imageUrl: 'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+    photos: [
+      'https://uc.orez.io/i/426f5eb83b954ef1b32ac2bfe7e1d365-Large',
+      'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+    ],
+    amenities: [
+      { category: 'Listing Type', value: 'Villa' },
+      { category: 'Accommodation', value: 'Entire Home' },
+      { category: 'Check-In', value: 'Lockbox' },
+      { category: 'Setting & View', value: 'Oceanfront, Ocean View' },
+      { category: 'Internet / Wifi', value: 'Yes' },
+    ],
+    cancellationPolicy: 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to arrival.',
+    ownerName: '',
+    ownerBio: '',
+    location: 'Christiansted, St. Croix, USVI',
+    bookingUrl: '',
+    guestReviews: [],
+  },
+  'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx': {
+    id: 'orp5b5e89fx',
+    slug: 'sapala-2-oceanfront-poolside-apt-with-shared-pool-orp5b5e89fx',
+    name: 'Sapala 2 - Oceanfront Poolside Apt with Shared Pool',
+    description: `Take it easy at this unique and tranquil getaway. A one bedroom Poolside Apt facing the ocean. Walking distance to a nearby beach and the Nature Conservatory's Jacks & Issac's Bay. Olympic style 50' seaside pool is delightful after a kayak or snorkeling excursion down in front. Year-round trade breezes and the soothing sound of waves from the shoreline below make for an unforgettable stay.
+
+Another four bedroom unit above this apt is rented separately.`,
+    bedrooms: 1,
+    bathrooms: 1,
+    sleeps: '2',
+    nightlyRateMin: 119,
+    nightlyRateMax: 198,
+    imageUrl: 'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+    photos: [
+      'https://uc.orez.io/i/157958a328be436bbeb0b84aced8e300-Large',
+      'https://uc.orez.io/i/9599e9fcddb8413b99fd699d1e3ba720-Large',
+      'https://uc.orez.io/i/e7e37099016e4809b95b8e47c4d97051-Large',
+    ],
+    amenities: [
+      { category: 'Listing Type', value: 'Apartment' },
+      { category: 'Accommodation', value: 'Entire Home' },
+      { category: 'Check-In', value: 'Lockbox' },
+      { category: 'Setting & View', value: 'Oceanfront, Ocean View' },
+      { category: 'Internet / Wifi', value: 'Yes' },
+    ],
+    cancellationPolicy: 'One hundred percent (100.00%) of the total booking charges will be refunded if the cancellation is made more than 60 days prior to arrival.',
+    ownerName: '',
+    ownerBio: '',
+    location: 'Christiansted, St. Croix, USVI',
+    bookingUrl: '',
+    guestReviews: [],
+  },
+};
+
+// Fallback data for build time or if API fails
+const fallbackPropertyData = fallbackDetails[slug] || fallbackDetails['sapala-all-exclusive-oceanfront-villa-with-private-pool'];
+
+async function getPropertyDetails(slug: string): Promise<PropertyDetails> {
+  console.log('[getPropertyDetails] SSR:', import.meta.env.SSR, 'slug:', slug, 'apiBaseUrl:', JSON.stringify(apiBaseUrl));
+  // Always use fallback data during SSR (including dev SSR)
+  if (import.meta.env.SSR) {
+    console.log('[getPropertyDetails] Using SSR fallback');
+    return fallbackPropertyData;
+  }
+  
+  try {
+    const apiUrl = getApiUrl(`/api/property/${slug}/details`);
+    console.log('[getPropertyDetails] Fetching from:', apiUrl);
+    // Use absolute URL for client-side fetch
+    const res = await fetch(apiUrl, { 
+      signal: AbortSignal.timeout(10000) 
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.details && data.details.photos && data.details.photos.length > 0) {
+        return data.details as PropertyDetails;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching property details:', error);
+  }
+  // Return fallback if API fails
+  return fallbackPropertyData;
+}
+
+const propertyDetails = await getPropertyDetails(slug);
+
+---
+
+<Layout title={propertyDetails.name} description={propertyDetails.description}>
+  <!-- Hero -->
+  <div class="detail-hero" style={`background-image: url('${propertyDetails.imageUrl}');`}>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1>{propertyDetails.name}</h1>
+      <p>${propertyDetails.nightlyRateMin}&ndash;${propertyDetails.nightlyRateMax}/night &middot; {propertyDetails.bedrooms} Bedrooms &middot; {propertyDetails.bathrooms} Bathrooms &middot; Sleeps {propertyDetails.sleeps}</p>
+    </div>
+  </div>
+
+  <!-- Detail Body -->
+  <div class="detail-body">
+    <div class="detail-main">
+      <!-- Size & Rate Summary -->
+      <div class="size-rate-summary" style="margin-bottom:2rem; padding:1.5rem; background:var(--color-bg-card); border-radius:12px;">
+        <h2 style="margin:0 0 0.5rem 0;">Size</h2>
+        <p style="font-size:1.1rem; margin:0;">{propertyDetails.bedrooms} Bedrooms &bull; {propertyDetails.bathrooms} Bathrooms &bull; Sleeps {propertyDetails.sleeps}</p>
+        <h2 style="margin:1rem 0 0.5rem 0;">Rate</h2>
+        <p style="font-size:1.3rem; font-weight:700; color:var(--color-accent-dark); margin:0;">${propertyDetails.nightlyRateMin}&ndash;${propertyDetails.nightlyRateMax}/night</p>
+      </div>
+
+      <!-- Tabs Navigation -->
+      <div class="detail-tabs" style="display:flex; gap:1rem; margin-bottom:2rem; border-bottom:2px solid var(--color-border); padding-bottom:0;">
+        <a href="#photos" class="detail-tab active">PHOTOS</a>
+        <a href="#rates" class="detail-tab">RATES</a>
+        <a href="#availability" class="detail-tab">AVAILABILITY</a>
+        <a href="#details" class="detail-tab">DETAILS</a>
+        <a href="#inquire" class="detail-tab">INQUIRE</a>
+      </div>
+
+      <!-- About -->
+      <h2 id="details">About</h2>
+      <div style="line-height:1.8; color:var(--color-text-muted); margin-bottom:3rem;">
+        {propertyDetails.description.split('\n\n').map((paragraph) => (
+          <p style="margin:0 0 1rem 0;">{paragraph}</p>
+        ))}
+      </div>
+
+      <!-- Rates & Cancellation -->
+      <h2 id="rates" style="margin-top:3rem;">Rates & Availability</h2>
+      <div class="rate-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
+        <h3>Cancellation Policy</h3>
+        <p>{propertyDetails.cancellationPolicy}</p>
+      </div>
+
+      <!-- Amenities -->
+      <h2 style="margin-top:3rem;">Amenities <span class="amenities-toggle" id="amenitiesToggle" style="cursor:pointer; color:var(--color-accent-dark); font-size:0.95rem; margin-left:1rem;">(more...)</span></h2>
+      {propertyDetails.amenities.length > 0 ? (
+        <>
+          <table class="amenities-table" style="margin-top:1rem;" id="amenitiesTable">
+            {propertyDetails.amenities.slice(0, 5).map((a) => (
+              <tr>
+                <th>{a.category}</th>
+                <td>{a.value}</td>
+              </tr>
+            ))}
+          </table>
+          {propertyDetails.amenities.length > 5 && (
+            <table class="amenities-table amenities-extra" style="display:none; margin-top:1rem;" id="amenitiesExtra">
+              {propertyDetails.amenities.slice(5).map((a) => (
+                <tr>
+                  <th>{a.category}</th>
+                  <td>{a.value}</td>
+                </tr>
+              ))}
+            </table>
+          )}
+        </>
+      ) : (
+        <p style="color:var(--color-text-muted); margin-top:1rem;">Amenities information unavailable.</p>
+      )}
+
+      <!-- Photos Gallery -->
+      <h2 id="photos" style="margin-top:3rem;">Photos</h2>
+      {propertyDetails.photos && propertyDetails.photos.length > 0 ? (
+        <div class="gallery-grid" style="margin-top:1rem;">
+          {propertyDetails.photos.map((img) => (
+            <a href={img} target="_blank" rel="noopener noreferrer">
+              <img src={img} alt="Property photo" loading="lazy" />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p style="color:var(--color-text-muted); margin-top:1rem;">Photos information unavailable.</p>
+      )}
+
+      <!-- Location -->
+      <h2 style="margin-top:3rem;">Location</h2>
+      <p style="color:var(--color-text-muted); margin-top:0.5rem;">{propertyDetails.location}</p>
+
+      <!-- About the Owner -->
+      {propertyDetails.ownerName ? (
+        <>
+          <h2 style="margin-top:3rem;">About the Owner</h2>
+          <div class="owner-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
+            {propertyDetails.ownerBio ? (
+              <p style="color:var(--color-text-muted);">{propertyDetails.ownerBio}</p>
+            ) : (
+              <p style="color:var(--color-text-muted);">The owners of Sapala are passionate about sharing the beauty of St. Croix with guests from around the world. They take pride in maintaining their oceanfront property to provide an unforgettable Caribbean experience.</p>
+            )}
+          </div>
+        </>
+      ) : null}
+
+      <!-- Guest Reviews -->
+      {propertyDetails.guestReviews && propertyDetails.guestReviews.length > 0 ? (
+        <>
+          <h2 style="margin-top:3rem;">Guest Reviews</h2>
+          <div class="reviews-section" style="margin-top:1rem;">
+            {propertyDetails.guestReviews.map((review, idx) => (
+              <div class="review-card" style="padding:1.5rem; background:var(--color-bg-card); border-radius:12px; margin-bottom:1rem;" key={idx}>
+                <div class="review-stars" style="color:#fbbf24; font-size:1.2rem; margin-bottom:0.5rem;">★★★★★</div>
+                {review.comment && (
+                  <p style="color:var(--color-text-muted); font-style:italic;">"{review.comment}"</p>
+                )}
+                {review.author && (
+                  <p style="margin-top:0.5rem; font-weight:600;">- {review.author}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      ) : null}
+
+      <!-- Availability Calendar Section -->
+      <h2 id="availability" style="margin-top:3rem;">Availability</h2>
+      <div id="availabilityCalendar" data-api-base={apiBaseUrl} class="availability-calendar">
+        <div class="availability-calendar-header" style="margin-bottom:0.75rem;">
+          <h3 class="availability-calendar-title">Available Dates - 6 Months</h3>
+          <div class="calendar-month-nav">
+            <button type="button" id="prevMonthsBtn" class="btn-month-nav">< Prev 6 Months</button>
+            <button type="button" id="resetMonthBtn" class="btn-month-nav" style="background:#3b82f6; color:white;">Reset</button>
+            <button type="button" id="nextMonthsBtn" class="btn-month-nav">Next 6 Months ></button>
+          </div>
+        </div>
+        <div id="calendarContainer" class="calendar-grid-container"></div>
+        <div class="legend-container">
+          <div class="legend-item"><div class="legend-color" style="background:#fee2e2;"></div><span class="legend-label">Blocked</span></div>
+          <div class="legend-item"><div class="legend-color" style="background:#fed7aa;"></div><span class="legend-label">Reserved</span></div>
+          <div class="legend-item"><div class="legend-color" style="background:#d1fae5;"></div><span class="legend-label">Available (Weekday)</span></div>
+          <div class="legend-item"><div class="legend-color" style="background:#fef3c7;"></div><span class="legend-label">Available (Weekend)</span></div>
+        </div>
+        <p id="availabilityNote" style="margin-top:1rem; font-size:0.9rem; color:var(--color-text-muted);"></p>
+      </div>
+
+      <!-- Inquire Section -->
+      <h2 id="inquire" style="margin-top:3rem;">Inquire</h2>
+      <div class="inquire-card" style="padding:2rem; background:var(--color-bg-card); border-radius:12px; margin-top:1rem;">
+        <p style="font-size:1.1rem; margin-bottom:1rem;">Interested in booking this property? Get in touch with us directly:</p>
+        <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+          <a href="mailto:info@sapala.fun" class="btn-book" style="text-decoration:none;">Email Us</a>
+          {propertyDetails.bookingUrl ? (
+            <a href={propertyDetails.bookingUrl} target="_blank" rel="noopener" class="btn-book" style="text-decoration:none; background:#10b981;">Book Online</a>
+          ) : (
+            <a href="/book" class="btn-book" style="text-decoration:none; background:#10b981;">Book Online</a>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="detail-sidebar">
+      <div class="sidebar-card" style="position:sticky; top:2rem;">
+        <p class="sidebar-price-label">Starting from</p>
+        <p class="sidebar-price">${propertyDetails.nightlyRateMin}<span style="font-size:1rem; color:var(--color-text-muted); font-weight:400;">/night</span></p>
+        {propertyDetails.bookingUrl ? (
+          <a href={propertyDetails.bookingUrl} target="_blank" rel="noopener" class="sidebar-btn">Book Now</a>
+        ) : (
+          <a href="/book" class="sidebar-btn">Book Now</a>
+        )}
+      </div>
+      <div class="sidebar-card sidebar-contact">
+        <h3>Contact Us</h3>
+        <p><a href="mailto:info@sapala.fun">info@sapala.fun</a></p>
+        <p style="margin-top:0.5rem;">Christiansted, St. Croix, USVI</p>
+      </div>
+    </aside>
+  </div>
+
+      <!-- Scripts for amenities toggle, tabs, and availability calendar -->
+    <script type="module">
+      // Amenities toggle
+      const toggle = document.getElementById('amenitiesToggle');
+      const extraTable = document.getElementById('amenitiesExtra');
+      let showingMore = false;
+      if (toggle && extraTable) {
+        toggle.addEventListener('click', () => {
+          showingMore = !showingMore;
+          extraTable.style.display = showingMore ? 'table' : 'none';
+          toggle.textContent = showingMore ? '(less...)' : '(more...)';
+        });
+      }
+
+      // Tab active state
+      const tabs = document.querySelectorAll('.detail-tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+        });
+      });
+
+      // Multi-month availability calendar
+      let currentYear = new Date().getFullYear();
+      let currentMonth = new Date().getMonth() + 1;
+      const apiBase = document.getElementById('availabilityCalendar')?.dataset.apiBase || '';
+      const calendarContainer = document.getElementById('calendarContainer');
+
+      async function loadMonths(year, month, count) {
+        if (!apiBase) return;
+
+        const monthsToLoad = [];
+        for (let i = 0; i < count; i++) {
+          let m = month + i;
+          let y = year;
+          while (m > 12) { m -= 12; y++; }
+          while (m < 1) { m += 12; y--; }
+          monthsToLoad.push({ year: y, month: m });
+        }
+
+        try {
+          const promises = monthsToLoad.map(({ year, month }) => 
+            fetch(`${apiBase}/api/availability/all?year=${year}&month=${month}`).then(r => r.ok ? r.json() : null)
+          );
+          const results = await Promise.all(promises);
+          renderMonths(results);
+        } catch (error) {
+          console.error('Error loading availability:', error);
+        }
+      }
+
+      function renderMonths(monthsData) {
+        if (!calendarContainer) return;
+        
+        calendarContainer.innerHTML = '';
+        if (!monthsData || monthsData.every(d => !d)) return;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        monthsData.forEach(data => {
+          if (!data) return;
+
+          const monthName = new Date(data.year, data.month - 1).toLocaleDateString('en-US', { 
+            month: 'long', year: 'numeric'
+          });
+
+          const monthEl = document.createElement('div');
+          monthEl.className = 'availability-month';
+
+          // Header
+          const header = document.createElement('div');
+          header.className = 'availability-month-header';
+          header.innerHTML = `<strong class="availability-month-title">${monthName}</strong>`;
+          monthEl.appendChild(header);
+
+          // Grid
+          const grid = document.createElement('div');
+          grid.className = 'calendar-grid';
+
+          ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].forEach(day => {
+            const headerCell = document.createElement('div');
+            headerCell.className = 'calendar-day-name';
+            headerCell.textContent = day;
+            grid.appendChild(headerCell);
+          });
+
+          const firstDay = new Date(data.year, data.month - 1, 1);
+          const lastDate = new Date(data.year, data.month, 0).getDate();
+          const startDay = firstDay.getDay();
+
+          for (let i = 0; i < startDay; i++) grid.appendChild(document.createElement('div'));
+
+          const dates = data.dates || [];
+
+          for (let day = 1; day <= lastDate; day++) {
+            const dateStr = `${data.year}-${String(data.month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const isWeekend = [0, 6].includes(new Date(data.year, data.month - 1, day).getDay());
+
+            const cell = document.createElement('div');
+            cell.className = 'availability-cell';
+            if (dateStr === todayStr) cell.classList.add('today');
+
+            const dateInfo = dates.find(d => d.date === dateStr);
+
+            if (dateInfo && dateInfo.blocked) {
+              cell.classList.add(dateInfo.reason === 'Blocked' ? 'blocked': 'reserved');
+              cell.innerHTML = `
+                <span class="day-number">${day}</span>
+                <span class="reason" style="font-size:0.6rem;color:#9a3412;">${dateInfo.reason?.substring(0,8)}</span>
+              `;
+            } else {
+              cell.classList.add('available');
+              if (isWeekend) cell.classList.add('weekend');
+              const rate = dateInfo && dateInfo.nightlyRate ? Math.round(dateInfo.nightlyRate) : null;
+              cell.innerHTML = `
+                <span class="day-number">${day}</span>
+                ${rate ? `<span class="rate-info">$${rate}</span>` : ''}
+              `;
+            }
+
+            grid.appendChild(cell);
+          }
+
+          monthEl.appendChild(grid);
+          calendarContainer.appendChild(monthEl);
+        });
+
+        updateStats(monthsData);
+      }
+
+      function updateStats(monthsData) {
+        let totalDays = 0, availableDays = 0;
+        monthsData.forEach(data => {
+          if (!data || !data.dates) return;
+          data.dates.forEach(d => {
+            totalDays++;
+            if (!d.blocked) availableDays++;
+          });
+        });
+
+        const noteEl = document.getElementById('availabilityNote');
+        if (noteEl && totalDays > 0) {
+          noteEl.textContent = `${Math.round((availableDays / totalDays) * 100)}% of dates available across ${totalDays} days`;
+        }
+      }
+
+      // Initial load: show 6 months
+      loadMonths(currentYear, currentMonth, 6);
+
+      // Navigation buttons
+      const prevBtn = document.getElementById('prevMonthsBtn');
+      const nextBtn = document.getElementById('nextMonthsBtn');
+      const resetBtn = document.getElementById('resetMonthBtn');
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          currentMonth -= 6;
+          if (currentMonth < 1) { currentMonth += 12; currentYear--; }
+          loadMonths(currentYear, currentMonth, 6);
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          currentMonth += 6;
+          if (currentMonth > 12) { currentMonth -= 12; currentYear++; }
+          loadMonths(currentYear, currentMonth, 6);
+        });
+      }
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', () => {
+          const now = new Date();
+          currentYear = now.getFullYear();
+          currentMonth = now.getMonth() + 1;
+          loadMonths(currentYear, currentMonth, 6);
+        });
+      }
+    </script>
+</Layout>
