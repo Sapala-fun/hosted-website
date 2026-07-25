@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+
+  - repo: https://github.com/ambv/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^backend/
+
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Prettier (Frontend)
+        entry: npx --yes prettier --write
+        language: system
+        types_or: [javascript, astro, json, css, scss]
+        files: ^frontend/

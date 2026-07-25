@@ -644,3 +644,148 @@ img { max-width: 100%; display: block; }
   .detail-sidebar { position: static; }
   .nav-links { gap: 0.8rem; }
 }
+
+/* === Availability Calendar === */
+.availability-page {
+  padding: 2rem 1rem;
+}
+.availability-page h1 {
+  font-family: var(--font-heading);
+  margin-bottom: 1.5rem;
+}
+.availability-calendar {
+  background: var(--color-white);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.availability-page h1 {
+  font-size: 2rem;
+}
+.availability-calendar-title {
+  font-size: 1.3rem;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+.calendar-month-nav {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.btn-month-nav {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: var(--color-bg-alt);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.btn-month-nav:hover {
+  background: var(--color-accent-light);
+  color: var(--color-white);
+}
+.btn-month-nav[style*="background:#3b82f6"] {
+  background: var(--color-accent);
+  color: white;
+}
+
+.calendar-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.availability-month {
+  background: var(--color-white);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+}
+.availability-month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.availability-month-title {
+  font-size: 1.1rem;
+  color: var(--color-accent-dark);
+  font-weight: 600;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.25rem;
+}
+.calendar-day-name {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+}
+.availability-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  position: relative;
+}
+.availability-cell .day-number {
+  font-weight: 600;
+  color: var(--color-text);
+}
+.availability-cell .reason,
+.availability-cell .rate-info {
+  margin-top: 2px;
+}
+.today {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+}
+.available {
+  background: #d1fae5;
+  cursor: pointer;
+}
+.available.weekend {
+  background: #fef3c7;
+}
+.blocked {
+  background: #fee2e2;
+  opacity: 0.7;
+}
+.reserved {
+  background: #fed7aa;
+  opacity: 0.7;
+}
+
+.legend-container {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+.legend-color {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 4px;
+}
+
+/* === Classic Theme Calendar (override) === */
+.theme-classic .availability-calendar { box-shadow: none; border: 1px solid var(--color-border); }
+.theme-classic .calendar-grid-container { gap: 1rem; }

@@ -260,3 +260,90 @@ img { max-width: 100%; display: block; }
   .detail-body { grid-template-columns: 1fr; }
   .detail-sidebar { position: static; }
 }
+
+/* === Availability Calendar (Classic Theme) === */
+.availability-calendar {
+  background: rgba(255,255,255,0.95);
+  color: var(--color-dark);
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: none;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.availability-calendar-title {
+  font-size: 1.3rem;
+  color: var(--color-accent);
+  margin-bottom: 0.75rem;
+}
+.calendar-month-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.btn-month-nav {
+  padding: 0.4rem 0.8rem;
+  border: none;
+  background: var(--color-accent);
+  color: var(--color-dark);
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-month-nav:hover { opacity: 0.9; }
+.calendar-grid-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.availability-month {
+  background: rgba(255,255,255,0.9);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+.availability-month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.2rem;
+}
+.calendar-day-name {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  font-weight: 600;
+  padding-bottom: 0.25rem;
+}
+.availability-cell {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+.availability-cell .day-number { font-weight: 600; }
+.today { outline: 2px solid var(--color-accent); outline-offset: -1px; }
+.available { background: #d1fae5; color: var(--color-dark); }
+.available.weekend { background: #fef3c7; color: var(--color-dark); }
+.blocked { background: #fee2e2; opacity: 0.8; }
+.reserved { background: #fed7aa; opacity: 0.8; }
+.legend-container {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+.legend-color { width: 1rem; height: 1rem; border-radius: 3px; }
