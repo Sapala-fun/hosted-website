@@ -69,6 +69,9 @@ func main() {
 	r.GET("/api/availability/:slug", func(c *gin.Context) {
 		availabilityHandler(c, client)
 	})
+	r.GET("/api/availability/all", func(c *gin.Context) {
+		allAvailabilityHandler(c, client)
+	})
 
 	// Serve Astro build output for all other routes
 	r.StaticFS("/_astro", http.Dir(filepath.Join(frontendDist, "_astro")))
@@ -309,3 +312,71 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 		"propertyID": propertyID,
 	})
 }
+
+func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
+	c.Header("Content-Type", "application/json")
+	
+	yearStr := c.Query("year")
+	monthStr := c.Query("month")
+	
+	if yearStr == "" || monthStr == "" {
+		c.JSON(400, gin.H{"error": "year and month query parameters are required"})
+		return
+	}
+	
+	var year, month int
+	if _, err := fmt.Sscanf(yearStr, "%d", &year); err != nil {
+		c.JSON(400, gin.H{"error": "invalid year parameter"})
+		return
+	}
+	if _, err := fmt.Sscanf(monthStr, "%d", &month); err != nil {
+		c.JSON(400, gin.H{"error": "invalid month parameter"})
+		return
+	}
+	
+	properties, err := client.GetProperties()
+	if err != nil {
+		c.JSON(200, gin.H{
+			"dates":   []ownerrez.AvailabilityDate{},
+			"warning": err.Error(),
+		})
+		return
+	}
+	
+	var propertyID int
+	for _, prop := range properties {
+		if id, ok := prop["id"].(float64); ok {
+			propertyID = int(id)
+			break
+		}
+		if id, ok := prop["id"].(int); ok {
+			propertyID = id
+			break
+		}
+	}
+	
+	if propertyID == 0 {
+		c.JSON(200, gin.H{
+			"dates":   []ownerrez.AvailabilityDate{},
+			"warning": "No properties found",
+		})
+		return
+	}
+	
+	dates, err := client.GetAvailability(propertyID, year, month)
+	if err != nil {
+		c.JSON(200, gin.H{
+			"dates":   []ownerrez.AvailabilityDate{},
+			"warning": err.Error(),
+		})
+		return
+	}
+	
+	c.JSON(200, gin.H{
+		"dates":      dates,
+		"year":       year,
+		"month":      month,
+		"propertyID": propertyID,
+	})
+}
+
