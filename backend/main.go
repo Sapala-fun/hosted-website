@@ -315,15 +315,15 @@ func availabilityHandler(c *gin.Context, client *ownerrez.Client) {
 
 func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 	c.Header("Content-Type", "application/json")
-	
+
 	yearStr := c.Query("year")
 	monthStr := c.Query("month")
-	
+
 	if yearStr == "" || monthStr == "" {
 		c.JSON(400, gin.H{"error": "year and month query parameters are required"})
 		return
 	}
-	
+
 	var year, month int
 	if _, err := fmt.Sscanf(yearStr, "%d", &year); err != nil {
 		c.JSON(400, gin.H{"error": "invalid year parameter"})
@@ -333,7 +333,7 @@ func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 		c.JSON(400, gin.H{"error": "invalid month parameter"})
 		return
 	}
-	
+
 	properties, err := client.GetProperties()
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -342,7 +342,7 @@ func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 		})
 		return
 	}
-	
+
 	var propertyID int
 	for _, prop := range properties {
 		if id, ok := prop["id"].(float64); ok {
@@ -354,7 +354,7 @@ func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 			break
 		}
 	}
-	
+
 	if propertyID == 0 {
 		c.JSON(200, gin.H{
 			"dates":   []ownerrez.AvailabilityDate{},
@@ -362,7 +362,7 @@ func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 		})
 		return
 	}
-	
+
 	dates, err := client.GetAvailability(propertyID, year, month)
 	if err != nil {
 		c.JSON(200, gin.H{
@@ -371,7 +371,7 @@ func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 		})
 		return
 	}
-	
+
 	c.JSON(200, gin.H{
 		"dates":      dates,
 		"year":       year,
@@ -379,4 +379,3 @@ func allAvailabilityHandler(c *gin.Context, client *ownerrez.Client) {
 		"propertyID": propertyID,
 	})
 }
-
