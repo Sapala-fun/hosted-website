@@ -34,4 +34,4 @@ jobs:
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: frontend/dist/
-          preview-path-prefix: pr-${{ github.event.number }}
+          pr-number: ${{ github.event.number }}
