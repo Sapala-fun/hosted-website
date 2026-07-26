@@ -29,7 +29,7 @@ jobs:
           npm run build
 
       - name: Deploy to PR Preview
-        uses: rossjrw/pr-preview-action@v1.7.0
+        uses: rossjrw/pr-preview-action@v1.8.0
         with:
           source-dir: frontend/dist/
           preview-path-prefix: pr-${{ github.event.number }}
