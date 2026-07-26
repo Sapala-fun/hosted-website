@@ -27,7 +27,7 @@ jobs:
       - name: Configure Astro base path
         working-directory: frontend
         run: |
-          sed -i '' "s|base: '/'|base: '/pr-${{ github.event.number }}/|" astro.config.mjs
+          sed -i "s|base: '/'|base: '/pr-${{ github.event.number }}/|" astro.config.mjs
 
       - name: Build with Astro
         working-directory: frontend
