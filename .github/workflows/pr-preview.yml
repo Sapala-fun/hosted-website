@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build with Astro
         working-directory: frontend
@@ -28,9 +26,10 @@ jobs:
           npm ci --ignore-scripts
           npm run build
 
-      - name: Deploy to PR Preview
-        uses: rossjrw/pr-preview-action@v1.7.0
-        with:
-          source-dir: frontend/dist/
-          preview-path-prefix: pr-${{ github.event.number }}
-          should-comment: false
+      - name: Preview deployment
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+          GITHUB_TOKEN: ${{ secrets.PAT_GITHUB_PAGES }}
+        run: |
+          echo "Build completed. Review the workflow logs to verify the build."
+          echo "Deploy would be at: https://Sapala-fun.github.io/hosted-website/pr-${PR_NUMBER}/"
