@@ -1,10 +1,8 @@
-name: Deploy static site to GitHub Pages
+name: PR Preview Deployment
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -12,15 +10,14 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: pr-${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  deploy-preview:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -34,11 +31,11 @@ jobs:
           npm ci --ignore-scripts
           npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+      - name: Deploy to PR Preview
+        uses: rossjrw/pr-preview-action@v1.7.0
         with:
-          path: frontend/dist/
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          source-dir: frontend/dist/
+          preview-path-prefix: pr-${{ github.event.number }}
+          extra-files: |
+            ../backend
+          github-pages-artifact: true
