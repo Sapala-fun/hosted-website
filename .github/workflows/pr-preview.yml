@@ -28,10 +28,11 @@ jobs:
         working-directory: frontend
         run: |
           npm ci --ignore-scripts
+          PR_NUMBER=${{ github.event.number }}
+          sed -i "s|base: '/'|base: '/pr-${PR_NUMBER}/'|" astro.config.mjs
           npm run build
 
       - name: Deploy to PR Preview
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: frontend/dist/
-          pages-base-path: pr-${{ github.event.number }}
