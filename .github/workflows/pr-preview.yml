@@ -28,9 +28,8 @@ jobs:
           npm ci --ignore-scripts
           npm run build
 
-      - name: Deploy to PR Preview via Pages API
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Building preview for PR #${{ github.event.number }}"
-          echo "URL: https://Sapala-fun.github.io/hosted-website/pr-${{ github.event.number }}/"
+      - name: Deploy to PR Preview
+        uses: rossjrw/pr-preview-action@v1.8.0
+        with:
+          source-dir: frontend/dist/
+          preview-path-prefix: pr-${{ github.event.number }}
