@@ -24,12 +24,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Configure Astro base path
+        working-directory: frontend
+        run: |
+          sed -i '' "s|base: '/'|base: '/pr-${{ github.event.number }}/|" astro.config.mjs
+
       - name: Build with Astro
         working-directory: frontend
         run: |
           npm ci --ignore-scripts
-          PR_NUMBER=${{ github.event.number }}
-          sed -i "s|base: '/'|base: '/pr-${PR_NUMBER}/'|" astro.config.mjs
           npm run build
 
       - name: Deploy to PR Preview
