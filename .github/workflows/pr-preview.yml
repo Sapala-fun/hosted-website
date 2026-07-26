@@ -16,14 +16,9 @@ concurrency:
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
 
       - name: Build with Astro
         working-directory: frontend
@@ -36,6 +31,3 @@ jobs:
         with:
           source-dir: frontend/dist/
           preview-path-prefix: pr-${{ github.event.number }}
-          extra-files: |
-            ../backend
-          github-pages-artifact: true
