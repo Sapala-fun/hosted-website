@@ -34,4 +34,4 @@ jobs:
         uses: rossjrw/pr-preview-action@v1
         with:
           source-dir: frontend/dist/
-          preview-branch: gh-pages
+          pages-base-path: pr-${{ github.event.number }}
