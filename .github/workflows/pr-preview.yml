@@ -8,7 +8,6 @@ permissions:
   contents: write
   pages: write
   id-token: write
-  issues: write
 
 concurrency:
   group: pr-${{ github.event.number }}
@@ -34,3 +33,4 @@ jobs:
         with:
           source-dir: frontend/dist/
           preview-path-prefix: pr-${{ github.event.number }}
+          should-comment: false
