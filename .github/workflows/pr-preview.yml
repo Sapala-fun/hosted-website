@@ -24,10 +24,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Configure Astro base path
+      - name: Set base path
         working-directory: frontend
         run: |
-          sed -i "s|base: '/'|base: '/pr-${{ github.event.number }}/|" astro.config.mjs
+          node -e "const fs = require('fs'); const config = fs.readFileSync('astro.config.mjs', 'utf8'); const updated = config.replace(/base: '\/'/, \`base: '/pr-${{ github.event.number }}/'}\`); fs.writeFileSync('astro.config.mjs', updated);"
 
       - name: Build with Astro
         working-directory: frontend
