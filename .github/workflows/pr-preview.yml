@@ -1,0 +1,38 @@
+name: PR Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: pr-${{ github.event.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      PR_NUMBER: ${{ github.event.number }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Build with Astro
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts
+          sed -E "s|(base: '/).*(/')|\1pr-\${PR_NUMBER}/\2|" astro.config.mjs > astro.config.tmp && mv astro.config.tmp astro.config.mjs
+          npm run build
+
+      - name: Deploy to PR Preview
+        uses: rossjrw/pr-preview-action@v1
+        with:
+          source-dir: frontend/dist/
