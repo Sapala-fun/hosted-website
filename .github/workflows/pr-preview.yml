@@ -20,19 +20,16 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      PR_NUMBER: ${{ github.event.number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-
-      - name: Set base path
-        working-directory: frontend
-        run: |
-          node -e "const fs = require('fs'); const config = fs.readFileSync('astro.config.mjs', 'utf8'); const updated = config.replace(/base: '\/'/, \`base: '/pr-${{ github.event.number }}/'}\`); fs.writeFileSync('astro.config.mjs', updated);"
 
       - name: Build with Astro
         working-directory: frontend
         run: |
           npm ci --ignore-scripts
+          sed -E "s|(base: '/).*(/')|\1pr-\${PR_NUMBER}/\2|" astro.config.mjs > astro.config.tmp && mv astro.config.tmp astro.config.mjs
           npm run build
 
       - name: Deploy to PR Preview
