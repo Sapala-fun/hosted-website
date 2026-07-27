@@ -43,22 +43,22 @@ const properties = [
     </div>
     <header class="site-header">
       <nav class="nav-inner">
-        <a href="/" class="nav-logo">Sapala.Fun</a>
+        <a href="/hosted-website/" class="nav-logo">Sapala.Fun</a>
         <button class="mobile-toggle" aria-label="Toggle navigation menu">☰</button>
         <ul class="nav-links">
-          <li><a href="/">Home</a></li>
+          <li><a href="/hosted-website/">Home</a></li>
           <li class="dropdown">
-            <a href="/properties">Listings</a>
+            <a href="/hosted-website/properties">Listings</a>
             <ul class="dropdown-menu">
               {properties.map((prop) => (
-                <li><a href={prop.slug} external>{prop.name}</a></li>
+                <li><a href={ "/hosted-website" + prop.slug } external>{prop.name}</a></li>
               ))}
             </ul>
           </li>
-          <li><a href="/map">Map</a></li>
-          <li><a href="/availability">Availability</a></li>
-          <li><a href="/reviews">Reviews</a></li>
-          <li><a href="/book" class="btn-book">Book Now</a></li>
+          <li><a href="/hosted-website/map">Map</a></li>
+          <li><a href="/hosted-website/availability">Availability</a></li>
+          <li><a href="/hosted-website/reviews">Reviews</a></li>
+          <li><a href="/hosted-website/book" class="btn-book">Book Now</a></li>
         </ul>
       </nav>
     </header>

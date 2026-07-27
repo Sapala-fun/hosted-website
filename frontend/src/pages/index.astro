@@ -122,7 +122,7 @@ function getPropertySlug(p: any): string {
     // Return slug as-is (it should include the ID suffix)
     return slug;
   }
-  
+
   // Fallback to just id if slug is empty/missing
   return p.id?.toString().trim() || '';
 }
@@ -183,7 +183,7 @@ const features = [
     </div>
     <div class="property-grid">
       {properties.map((prop) => (
-        <a href={`/${getPropertySlug(prop)}`} class="property-card">
+        <a href={`/hosted-website/${getPropertySlug(prop)}`} class="property-card">
           <div class="property-card-img" style={`background-image: url('${prop.imageUrl}');`}>
             <span class="property-card-badge">{prop.bedrooms} BR</span>
           </div>

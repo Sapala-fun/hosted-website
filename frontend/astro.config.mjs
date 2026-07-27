@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  base: '/',
+  base: '/hosted-website/',
   server: {
     proxy: {
       '/api': {
